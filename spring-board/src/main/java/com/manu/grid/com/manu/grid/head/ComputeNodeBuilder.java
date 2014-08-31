@@ -6,13 +6,8 @@ import java.util.List;
 public class ComputeNodeBuilder {
 
 	public ComputeNode build(String computeNodeURL) {
-		ComputeNode cn = new ComputeNode(computeNodeURL, discoverServices(computeNodeURL));
+		ComputeNode cn = new ComputeNode(computeNodeURL);
 		return cn;
 	}
-	
-	public List<String> discoverServices(String computeNodeURL) {
-		List<String> services = new ArrayList<String>(2);
-		services.add("test-service");
-		return services;
-	}
+
 }

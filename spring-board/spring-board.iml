@@ -11,6 +11,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="org.springframework.integration:spring-integration-rmi:2.1.2.RELEASE" level="project" />
   </component>
 </module>
 
