@@ -1,5 +1,7 @@
 package com.manu.grid.com.manu.grid.head;
 
+import com.manu.grid.executor.ComputeExecutor;
+
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -11,11 +13,13 @@ public abstract class HeadNode {
 
     protected  int inactivityTimeOut;
 	protected ComputeNodeBuilder cnBuilder = null;
+    protected ComputeExecutor executor = null;
 	protected List<ComputeNode> computeNodes;
 	private ConcurrentHashMap<String, ComputeNode> urlNodeMap;
 	
 	private Queue<ComputeNode> freeNodes;
-	private Map<String, ComputeNode> busyNodes;
+    private Map<String, ComputeNode> busyNodes;
+    private Map<String, Object> nodePayload;
     private PriorityQueue<ComputeNode> leastActiveNodes;
     protected List<ComputeNode> inactiveNodes;
 
@@ -34,12 +38,12 @@ public abstract class HeadNode {
         leastActiveNodes.add(cn);
 	}
 	
-	public ComputeNode getNextComputeNodeForService(String serviceName) {
+	public ComputeNode getNextComputeNodeForService() {
 		ComputeNode free = freeNodes.poll();
 		busyNodes.put(free.url, free);
 		return free;
 	}
-	public void setComputeNodeFree(String computeNodeURL) {
+    public void setComputeNodeFree(String computeNodeURL) {
 		ComputeNode wasBusy = urlNodeMap.get(computeNodeURL);
 		freeNodes.add(wasBusy);
 		busyNodes.remove(computeNodeURL);
@@ -49,11 +53,21 @@ public abstract class HeadNode {
         urlNodeMap.clear();
     }
 
-    public void blackListInactiveNode() {
+    public Object blackListInactiveNode() {
+        Object payload = null;
         ComputeNode cn = leastActiveNodes.peek();
         final int time = (int) (System.currentTimeMillis() - cn.lastComm)/1000;
         if(time > inactivityTimeOut) {
-
+            cn = leastActiveNodes.poll();
+            freeNodes.remove(cn);
+            if(busyNodes.containsKey(cn.url))
+                busyNodes.remove(cn.url);
+            if(nodePayload.containsKey(cn.url)) {
+                payload = nodePayload.get(cn.url);
+                nodePayload.remove(cn.url);
+            }
         }
+        return payload;
     }
+
 }
