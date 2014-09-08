@@ -3,8 +3,18 @@
 echo "make starting .."
 
 cd ./src
-gcc -o ../target/hello hello.c -framework opencl
-cp *.cl ../target/
-cd ..
 
-echo "make completed!"
+if [ -f "${1}.c" ]
+then
+	srcfile=${1}
+	echo "making source file = ${srcfile}.c .."
+
+	gcc -o ../target/${srcfile} ${srcfile}.c -framework opencl
+	cp *.cl ../target/
+	cd ..
+	echo "make completed!"
+else
+	echo "Source file ${1}.c not found"
+fi
+
+
