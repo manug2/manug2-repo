@@ -1,4 +1,4 @@
-__kernel void sqi(__global int *result, __global int* ts)
+__kernel void sqi(__global int *result, int ts)
 {
-*result = (*ts) * (*ts);
+*result = ts * ts;
 }

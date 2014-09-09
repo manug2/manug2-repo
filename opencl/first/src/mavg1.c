@@ -10,6 +10,12 @@
 #define MEM_SIZE (5)
 #define MAX_SOURCE_SIZE (0x100000)
 
+#define WINDOW_SIZE (10)
+
+int stock_array1[] = {
+	#include "stock_array1.txt"
+};
+
 int main(int argc, char *argv[])
 {
 
@@ -37,6 +43,7 @@ cl_device_id device_id = NULL;
 cl_context context = NULL;
 cl_command_queue command_queue = NULL;
 cl_mem memobj = NULL;
+cl_mem memobj1 = NULL, memobj2 = NULL, memobj3;
 cl_program program = NULL;
 cl_kernel kernel = NULL;
 cl_platform_id platform_id = NULL;
@@ -44,9 +51,12 @@ cl_uint ret_num_devices;
 cl_uint ret_num_platforms;
 cl_int ret;
 
-int sum=0;
-int n1=1, n2=3;
-cl_int to_sq = 3;
+float *result;
+int data_num = sizeof(stock_array1) / sizeof(stock_array1[0]);
+int window_num = (int) WINDOW_SIZE;
+int i;
+
+result = (float*) malloc(data_num * sizeof(float));
 
 FILE *fp;
 char *source_str;
@@ -72,8 +82,12 @@ context = clCreateContext(NULL, 1, &device_id, NULL, NULL, &ret);
 command_queue = clCreateCommandQueue(context, device_id, 0, &ret);
 printf("queue ret = %d\n", ret);
 
-memobj = clCreateBuffer(context, CL_MEM_WRITE_ONLY, sizeof(int), NULL, &ret);
+memobj = clCreateBuffer(context, CL_MEM_READ_WRITE, data_num * sizeof(int), NULL, &ret);
 printf("create buffer ret = %d\n", ret);
+memobj1 = clCreateBuffer(context, CL_MEM_WRITE_ONLY, data_num * sizeof(int), NULL, &ret);
+printf("create buffer ret = %d\n", ret);
+
+ret = clEnqueueWriteBuffer(command_queue, memobj, CL_TRUE, 0, data_num * sizeof(int), stock_array1, 0, NULL, NULL);
 
 program = clCreateProgramWithSource(context, 1, (const char**) &source_str, (const size_t*) &source_size, &ret);
 ret = clBuildProgram(program, 1, &device_id, NULL, NULL, NULL);
@@ -84,17 +98,18 @@ printf("create kernel ret = %d\n", ret);
 //How to set int arguments?
 ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void*) &memobj);
 printf("arg 0 ret = %d\n", ret);
-ret = clSetKernelArg(kernel, 1, sizeof(int), (void*) &to_sq);
+ret = clSetKernelArg(kernel, 1, sizeof(cl_mem), (void*) &memobj1);
 printf("arg 1 ret = %d\n", ret);
+ret = clSetKernelArg(kernel, 2, sizeof(int), (void*) &data_num);
+printf("arg 2 ret = %d\n", ret);
+ret = clSetKernelArg(kernel, 3, sizeof(int), (void*) &window_num);
+printf("arg 3 ret = %d\n", ret);
 
 ret = clEnqueueTask(command_queue, kernel, 0, NULL, NULL);
 printf("enqueue task ret = %d\n", ret);
 
-//How to read a int?
-ret = clEnqueueReadBuffer(command_queue, memobj, CL_TRUE, 0, sizeof(int), &sum, 0, NULL, NULL);
+ret = clEnqueueReadBuffer(command_queue, memobj1, CL_TRUE, 0, data_num * sizeof(float), result, 0, NULL, NULL);
 printf("read buffer ret = %d\n", ret);
-printf ("Square of [%d] = [%d]", to_sq, sum);
-
 
 ret=clFlush(command_queue);
 ret=clFinish(command_queue);
@@ -102,11 +117,18 @@ ret=clReleaseKernel(kernel);
 ret=clReleaseProgram(program);
 
 ret=clReleaseMemObject(memobj);
+ret=clReleaseMemObject(memobj1);
+ret=clReleaseMemObject(memobj2);
 
 ret=clReleaseCommandQueue(command_queue);
 ret=clReleaseContext(context);
 
+for (i=0; i<data_num; i++)
+	printf("i = %d \t value = %d \t average = %f\n", i, stock_array1[i], result[i]);
+
+
 free(source_str);
+free(result);
 
 printf("\n");
 

@@ -44,6 +44,11 @@ cl_uint ret_num_devices;
 cl_uint ret_num_platforms;
 cl_int ret;
 
+cl_ulong local_size;
+cl_int cl_local_size;
+cl_event ev;
+size_t local_size_size;
+
 int sum=0;
 int n1=1, n2=3;
 cl_int to_sq = 3;
@@ -72,8 +77,9 @@ context = clCreateContext(NULL, 1, &device_id, NULL, NULL, &ret);
 command_queue = clCreateCommandQueue(context, device_id, 0, &ret);
 printf("queue ret = %d\n", ret);
 
-memobj = clCreateBuffer(context, CL_MEM_WRITE_ONLY, sizeof(int), NULL, &ret);
-printf("create buffer ret = %d\n", ret);
+clGetDeviceInfo(device_id, CL_DEVICE_LOCAL_MEM_SIZE, sizeof(local_size), &local_size, &local_size_size);
+printf("CL_DEVICE_LOCAL_MEM_ZISE = %d\n", (int)local_size);
+cl_local_size = local_size / 2;
 
 program = clCreateProgramWithSource(context, 1, (const char**) &source_str, (const size_t*) &source_size, &ret);
 ret = clBuildProgram(program, 1, &device_id, NULL, NULL, NULL);
@@ -82,26 +88,26 @@ kernel = clCreateKernel(program, progName, &ret);
 printf("create kernel ret = %d\n", ret);
 
 //How to set int arguments?
-ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void*) &memobj);
+ret = clSetKernelArg(kernel, 0, cl_local_size, NULL);
 printf("arg 0 ret = %d\n", ret);
-ret = clSetKernelArg(kernel, 1, sizeof(int), (void*) &to_sq);
+ret = clSetKernelArg(kernel, 1, sizeof(cl_local_size), &cl_local_size);
 printf("arg 1 ret = %d\n", ret);
 
-ret = clEnqueueTask(command_queue, kernel, 0, NULL, NULL);
+ret = clEnqueueTask(command_queue, kernel, 0, NULL, &ev);
 printf("enqueue task ret = %d\n", ret);
 
-//How to read a int?
-ret = clEnqueueReadBuffer(command_queue, memobj, CL_TRUE, 0, sizeof(int), &sum, 0, NULL, NULL);
-printf("read buffer ret = %d\n", ret);
-printf ("Square of [%d] = [%d]", to_sq, sum);
+if(ret == CL_OUT_OF_RESOURCES) {
+	puts("too large local");
+	return 1;
+}
+
+clWaitForEvents(1, &ev);
 
 
 ret=clFlush(command_queue);
 ret=clFinish(command_queue);
 ret=clReleaseKernel(kernel);
 ret=clReleaseProgram(program);
-
-ret=clReleaseMemObject(memobj);
 
 ret=clReleaseCommandQueue(command_queue);
 ret=clReleaseContext(context);
