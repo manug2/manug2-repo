@@ -54,7 +54,9 @@ cl_int ret;
 float *result;
 int data_num = sizeof(stock_array1) / sizeof(stock_array1[0]);
 int window_num = (int) WINDOW_SIZE;
-int i;
+
+printf("# of Records = [%d], # of windows = [%d]\n", data_num, window_num);
+
 int *sums;
 
 result = (float*) malloc(data_num * sizeof(float));
@@ -131,7 +133,7 @@ ret=clReleaseMemObject(memobj2);
 ret=clReleaseCommandQueue(command_queue);
 ret=clReleaseContext(context);
 
-for (i=0; i<data_num; i++)
+for (int i=0; i<data_num; i++)
 	printf("i = %d \t value = %d \t sum = %d \t average = %f\n", i, stock_array1[i], sums[i], result[i]);
 
 
