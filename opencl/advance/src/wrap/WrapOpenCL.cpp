@@ -1,19 +1,22 @@
+#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "WrapOpenCL.h"
 
-WrapOpenCL::WrapOpenCL(const char* kernelName) {
+using namespace std;
+
+WrapOpenCL::WrapOpenCL(char* kernelName) {
 	memSize = 128;
 	//Check null
 	this->kernelName = kernelName;
 
 	this->kernelFile = (char*) malloc(100*sizeof(char));
 	sprintf(this->kernelFile, "%s.cl", kernelName);
-	this->kernelFile = (char*) malloc(100*sizeof(char));
+	initNULL();
 }
 
-WrapOpenCL::WrapOpenCL(int memSize, const char* kernelName) {
+WrapOpenCL::WrapOpenCL(int memSize, char* kernelName) {
 	//if(memSize < 1)
 	this->memSize = memSize;
 	//Check null
@@ -21,11 +24,55 @@ WrapOpenCL::WrapOpenCL(int memSize, const char* kernelName) {
 
 	this->kernelFile = (char*) malloc(100*sizeof(char));
 	sprintf(this->kernelFile, "%s.cl", kernelName);
+	initNULL();
 }
+
+void WrapOpenCL::initNULL() {
+	device_id 	= NULL;
+        context 	= NULL;
+        command_queue 	= NULL;
+        program 	= NULL;
+        platform_id 	= NULL;
+	ev 		= NULL;
+}
+
+void WrapOpenCL::print() {
+	cout << endl << "File : " << this->kernelFile << ", Kernel : " << this->kernelName << endl;
+}
+
+void WrapOpenCL::setKernelArg(int argn, size_t arg_size, void * arg_ptr) {
+	cl_int ret;
+	ret = clSetKernelArg(this->kernel, argn, sizeof(cl_mem), arg_ptr);
+#ifdef DEBUG
+	cout << endl << "Set kernel arg #" << argn << " : " << ret;
+#endif
+}
+
+cl_mem WrapOpenCL::createBuffer(cl_mem_flags flags, size_t buf_size, void * host_ptr) {
+	cl_int ret;
+	cl_mem memobj;
+	memobj = clCreateBuffer(this->context, flags, buf_size, NULL, &ret);
+#ifdef DEBUG
+	cout << endl << "Create Buffer : " << ret;
+#endif
+	return memobj;
+}
+
+void WrapOpenCL::readBuffer(cl_mem memobj, cl_bool blocking_write, size_t offset, size_t buf_size, void * ptr, cl_uint num_of_events_in_wait_list, cl_event *event_wait_list) {
+
+	cl_int ret;
+	clEnqueueReadBuffer(this->command_queue, memobj, blocking_write, offset, buf_size, ptr, num_of_events_in_wait_list, event_wait_list, &this->ev);
+#ifdef DEBUG
+	cout << endl << "Read Buffer : " << ret;
+#endif
+} 
 
 void WrapOpenCL::invoke() {
 	cl_int ret;
 	ret = clEnqueueTask(command_queue, kernel, 0, NULL, &this->ev);
+#ifdef DEBUG
+	cout << endl << "Enqueue Task : " << ret;
+#endif
 }
 
 void WrapOpenCL::invoke(int global_size, int local_size) {
@@ -46,59 +93,69 @@ int WrapOpenCL::getMemSize() {
 void WrapOpenCL::initCL() {
 
 	cl_int ret;
-        char *source_str;
-        size_t source_size;
-	
-	printf("Using kernel file [%s], with kernel name [%s]\n", this->kernelFile, this->kernelName);
+	size_t source_size;
 
-	/*load the source code containing the kernel*/
-	FILE *fp;
-	fp = fopen (this->kernelFile, "r");
-	if (!fp) {
-	fprintf(stderr, "failed to load kernel.\n");
-	exit(1);
-	}
-
-	source_str = (char*)malloc(MAX_SOURCE_SIZE);
-	source_size = fread(source_str, 1, MAX_SOURCE_SIZE, fp);
-	fclose(fp);
-	
+	char *source_str = this->readSourceCL(source_size);
+        printf("Using kernel name [%s]\n", this->kernelName);
 	
 	/*Get platform and device info*/
 	ret = clGetPlatformIDs(1, &platform_id, &ret_num_platforms);
+#ifdef DEBUG
+	cout << endl << "Get Plaform ID : " << ret;
+#endif
+
 	ret = clGetDeviceIDs(platform_id, CL_DEVICE_TYPE_DEFAULT, 1 ,&device_id, &ret_num_devices);
+#ifdef DEBUG
+	cout << endl << "Get Device ID : " << ret;
+#endif
 	
 	this->context = clCreateContext(NULL, 1, &device_id, NULL, NULL, &ret);
-	this->command_queue = clCreateCommandQueue(context, device_id, 0, &ret);
-	this->program = clCreateProgramWithSource(context, 1, (const char**) &source_str, (const size_t*) &source_size, &ret);
-	ret = clBuildProgram(program, 1, &device_id, NULL, NULL, NULL);
-	this->kernel = clCreateKernel(program, this->kernelName, &ret);
+#ifdef DEBUG
+	cout << endl << "Create Context : " << ret;
+#endif
 
-	//this-> memobj = (cl_mem*) malloc( ((int) MAX_MEM_BUFFERS) * sizeof(cl_mem));
-	//for (int i=0; i < (int) MAX_MEM_BUFFERS); i++)
-		//this->memobj[i] = NULL;
+	this->command_queue = clCreateCommandQueue(context, device_id, 0, &ret);
+#ifdef DEBUG
+	cout << endl << "Create Command Queue : " << ret;
+#endif
+
+	this->program = clCreateProgramWithSource(context, 1, (const char**) &source_str, (const size_t*) &source_size, &ret);
+#ifdef DEBUG
+	cout << endl << "Create Program : " << ret;
+#endif
+
+	ret = clBuildProgram(program, 1, &device_id, NULL, NULL, NULL);
+#ifdef DEBUG
+	cout << endl << "Build Program : " << ret;
+#endif
+
+	this->kernel = clCreateKernel(program, this->kernelName, &ret);
+#ifdef DEBUG
+	cout << endl << "Create Kernel : " << ret;
+#endif
 
 	free(source_str);
 
 }
 
-void WrapOpenCL::freeResources() {
-	cl_int ret;
-	ret=clFlush(this->command_queue);
-	ret=clFinish(this->command_queue);
-	ret=clReleaseKernel(this->kernel);
-	ret=clReleaseProgram(this->program);
+char* WrapOpenCL::readSourceCL(size_t &source_size) {
 
-	/*
-	for (int i=0; i < (int) MAX_MEM_BUFFERS); i++) {
-		if(this->memobj[i] != NULL)
-			ret=clReleaseMemObject(this->memobj[i]);
-	}
-	*/
+        char *source_str;
+        printf("Using kernel file [%s]\n", this->kernelFile);
 
-	ret=clReleaseCommandQueue(this->command_queue);
-	ret=clReleaseContext(this->context);
-	
+        /*load the source code containing the kernel*/
+        FILE *fp;
+        fp = fopen (this->kernelFile, "r");
+        if (!fp) {
+        	fprintf(stderr, "failed to load kernel.\n");
+        	exit(1);
+        }
+
+        source_str = (char*)malloc(MAX_SOURCE_SIZE);
+        source_size = fread(source_str, 1, MAX_SOURCE_SIZE, fp);
+        fclose(fp);
+
+	return source_str;
 }
 
 char * WrapOpenCL::parseArgument(int argc, char* argv[]) {
@@ -114,8 +171,32 @@ char * WrapOpenCL::parseArgument(int argc, char* argv[]) {
 	}
 	
 	char * progName = argv[1];
-	printf("Using kernel file [%s.cl], with kernel name [%s]\n", progName, progName);
-
 	return progName;
+}
+
+
+WrapOpenCL::~WrapOpenCL() {
+#ifdef DEBUG
+	printf("Inside ~WrapOpenCL()..\n");
+#endif
+
+	cl_int ret;
+	ret=clFlush(this->command_queue);
+	ret=clFinish(this->command_queue);
+	ret=clReleaseKernel(this->kernel);
+	ret=clReleaseProgram(this->program);
+
+	/*
+	for (int i=0; i < (int) MAX_MEM_BUFFERS); i++) {
+		if(this->memobj[i] != NULL)
+			ret=clReleaseMemObject(this->memobj[i]);
+	}
+	*/
+
+	ret=clReleaseCommandQueue(this->command_queue);
+	ret=clReleaseContext(this->context);
+
+	//delete this->kernelFile;
+	
 }
 

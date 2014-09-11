@@ -9,37 +9,42 @@
 
 class WrapOpenCL {
 
-	int memSize;
-	char* kernelFile;
-	const char* kernelName;
-	
-	char *source_str;
-        size_t source_size;
+private:
+	char *readSourceCL(size_t &source_size);
+	void	initNULL();
+	char*	kernelFile;
+	const char*	kernelName;
 
-	cl_device_id device_id;
+
+	int memSize;
+	
+	cl_device_id	device_id;
+        cl_program	program;
+        cl_platform_id	platform_id;
+        cl_uint	ret_num_devices;
+        cl_uint	ret_num_platforms;
+
+        cl_kernel kernel;
         cl_context context;
         cl_command_queue command_queue;
-        cl_program program;
-        cl_platform_id platform_id;
-        cl_uint ret_num_devices;
-        cl_uint ret_num_platforms;
-
-	//cl_mem memobj[];
-
 	cl_event ev;
 
 public:
-        cl_kernel kernel;
+	void print();
 
-	WrapOpenCL(const char* kernelName);
-	WrapOpenCL(int memSize, const char* kernelName);
+	~WrapOpenCL();
+	WrapOpenCL(char* kernelName);
+	WrapOpenCL(int memSize, char* kernelName);
 
-	void initCL();
-	void invoke();
-	void invoke(int global_size, int local_size);
-	int 		getMemSize();
-	void freeResources();
+	void	initCL();
+	void	invoke();
+	void	invoke(int global_size, int local_size);
+	int 	getMemSize();
+	void	setKernelArg(int argn, size_t arg_size, void * arg_ptr);
+	cl_mem	createBuffer(cl_mem_flags flags, size_t buf_size, void * host_ptr);
+	void	readBuffer(cl_mem memobj, cl_bool blocking_write, size_t offset, size_t buf_size, void *ptr, cl_uint num_of_events_in_wait_list, cl_event *event_wait_list);
 
 	static char *	parseArgument(int argc, char* argv[]); 
+	
 
 };

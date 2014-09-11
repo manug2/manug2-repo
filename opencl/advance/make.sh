@@ -9,10 +9,9 @@ then
 	srcfile=${1}
 	echo "making source file = ${srcfile}.cpp .."
 
-	gcc -c ../src/wrap/WrapOpenCL.cpp
-	gcc -c ../src/${srcfile}.cpp
-	gcc -o ${srcfile} WrapOpenCL.o ${srcfile}.o -framework opencl
-	#gcc -o ${srcfile} ${srcfile}.o WrapOpenCL.o -framework opencl
+	g++ -c ../src/wrap/WrapOpenCL.cpp
+	g++ -c ../src/${srcfile}.cpp
+	g++ -o ${srcfile} WrapOpenCL.o ${srcfile}.o -framework opencl
 	cp ../src/*.cl .
 	cd ..
 	echo "make completed!"
