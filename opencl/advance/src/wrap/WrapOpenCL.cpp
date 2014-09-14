@@ -34,6 +34,7 @@ void WrapOpenCL::initNULL() {
         program 	= NULL;
         platform_id 	= NULL;
 	ev 		= NULL;
+	num_of_memobjs	= 0;
 }
 
 void WrapOpenCL::print() {
@@ -52,6 +53,8 @@ cl_mem WrapOpenCL::createBuffer(cl_mem_flags flags, size_t buf_size, void * host
 	cl_int ret;
 	cl_mem memobj;
 	memobj = clCreateBuffer(this->context, flags, buf_size, NULL, &ret);
+	this->memobjs[num_of_memobjs] = memobj;
+	num_of_memobjs++;
 #ifdef DEBUG
 	cout << endl << "Create Buffer : " << ret;
 #endif
@@ -62,6 +65,15 @@ void WrapOpenCL::readBuffer(cl_mem memobj, cl_bool blocking_write, size_t offset
 
 	cl_int ret;
 	clEnqueueReadBuffer(this->command_queue, memobj, blocking_write, offset, buf_size, ptr, num_of_events_in_wait_list, event_wait_list, &this->ev);
+#ifdef DEBUG
+	cout << endl << "Read Buffer : " << ret;
+#endif
+} 
+
+void WrapOpenCL::writeBuffer(cl_mem memobj, cl_bool blocking_write, size_t offset, size_t buf_size, void * ptr, cl_uint num_of_events_in_wait_list, cl_event *event_wait_list) {
+
+	cl_int ret;
+	clEnqueueWriteBuffer(this->command_queue, memobj, blocking_write, offset, buf_size, ptr, num_of_events_in_wait_list, event_wait_list, &this->ev);
 #ifdef DEBUG
 	cout << endl << "Read Buffer : " << ret;
 #endif
@@ -186,12 +198,10 @@ WrapOpenCL::~WrapOpenCL() {
 	ret=clReleaseKernel(this->kernel);
 	ret=clReleaseProgram(this->program);
 
-	/*
-	for (int i=0; i < (int) MAX_MEM_BUFFERS); i++) {
-		if(this->memobj[i] != NULL)
-			ret=clReleaseMemObject(this->memobj[i]);
+	for (int i=0; i < num_of_memobjs; i++) {
+		if(this->memobjs[i] != NULL)
+			ret=clReleaseMemObject(this->memobjs[i]);
 	}
-	*/
 
 	ret=clReleaseCommandQueue(this->command_queue);
 	ret=clReleaseContext(this->context);

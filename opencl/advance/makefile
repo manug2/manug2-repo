@@ -9,7 +9,12 @@ VPATH=src:src/wrap
 
 TARGET_DIR="../target"
 
-all:	sqi hello
+all:	hello sqi mavgsum1
+
+mavgsum1:	mavgsum1.cpp WrapOpenCL.o
+	$(CXX) $(CPPFLAGS) -c src/mavgsum1.cpp -o target/$@.o
+	$(COPY) src/mavgsum1.cl target/
+	$(CXX) $(LDFLAGS) -o target/$@ target/mavgsum1.o target/WrapOpenCL.o -framework opencl
 
 sqi:	sqi.cpp WrapOpenCL.o
 	$(CXX) $(CPPFLAGS) -c src/sqi.cpp -o target/$@.o
