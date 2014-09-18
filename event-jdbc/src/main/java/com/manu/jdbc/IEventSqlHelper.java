@@ -1,12 +1,12 @@
-package com.manu.jdbc.helper;
+package com.manu.jdbc;
 
 import java.sql.Connection;
 import java.sql.Statement;
 
 /**
- * Created by ManuGarg on 17/9/14.
+ * Created by ManuGarg on 19/9/14.
  */
-public interface ISqlHelper<T> {
+public interface IEventSqlHelper<T> {
 
     public Statement getExecutableStatement(Connection conn, T event);
 
