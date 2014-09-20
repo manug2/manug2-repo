@@ -1,7 +1,7 @@
 package com.manu.grid.executor;
 
-import com.manu.grid.com.manu.grid.head.ComputeNode;
-import com.manu.grid.com.manu.grid.head.HeadNode;
+import com.manu.grid.head.ComputeNode;
+import com.manu.grid.head.HeadNode;
 import com.manu.grid.transport.IRequestInvoker;
 import com.manu.grid.transport.ISerializer;
 

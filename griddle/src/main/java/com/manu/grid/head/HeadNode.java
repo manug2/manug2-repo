@@ -1,8 +1,11 @@
-package com.manu.grid.com.manu.grid.head;
+package com.manu.grid.head;
 
 import com.manu.grid.executor.ComputeExecutor;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class HeadNode {
