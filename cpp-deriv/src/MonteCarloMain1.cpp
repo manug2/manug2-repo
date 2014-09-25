@@ -1,6 +1,6 @@
 #include "Random1.h"
 #include "PayOff1.h"
-#include "MonteCarlo2.h"
+#include "MonteCarlo1.h"
 #include <iostream>
 #include <cmath>
 using namespace std;
@@ -33,11 +33,11 @@ int main()
 	cin >> NumberOfPaths;
 
 	PayOff callPayOff (Strike, PayOff::call);
-	double resultCall = MonteCarlo2(callPayOff, Expiry, Spot, Vol, r, NumberOfPaths);
+	double resultCall = MonteCarlo1(callPayOff, Expiry, Spot, Vol, r, NumberOfPaths);
 	cout << endl << "the call price is " << resultCall << endl;
 
 	PayOff putPayOff (Strike, PayOff::put);
-	double resultPut = MonteCarlo2(putPayOff, Expiry, Spot, Vol, r, NumberOfPaths);
+	double resultPut = MonteCarlo1(putPayOff, Expiry, Spot, Vol, r, NumberOfPaths);
 	cout << endl << "the put price is " << resultPut << endl;
 
 	double tmp;

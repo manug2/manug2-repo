@@ -1,13 +1,13 @@
 #include "MonteCarlo2.h"
-#include "PayOff1.h"
 #include "Random1.h"
 #include <cmath>
+#include "PayOff2.h"
 
 #if !defined(_MSC_VER)
 using namespace std;
 #endif
 
-double MonteCarlo2(const PayOff& thePayOff,
+double MonteCarlo1(const PayOff& thePayOff,
 		double Expiry,
 		double Spot,
 		double Vol,

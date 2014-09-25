@@ -4,27 +4,35 @@ RM=rm -f
 
 VPATH=src
 
-all:	MonteCarlo2Main
+all:	MonteCarloMain2 MonteCarloMain1 MonteCarloMain
 
-MonteCarlo2Main:	MonteCarlo2Main.cpp MonteCarlo2 Random1.o PayOff.o
+MonteCarloMain2:	MonteCarloMain2.cpp Random1 PayOff2 MonteCarlo2
 	${CXX} -c src/$@.cpp -o target/$@.o
-	${CXX} -o target/$@ target/$@.o target/Random1.o target/PayOff.o target/MonteCarlo2 target/MinMax.o
+	${CXX} -o target/$@ target/$@.o target/Random1 target/PayOff2 target/MonteCarlo2 target/MinMax
+MonteCarlo2:	MonteCarlo2.cpp Random1 PayOff2
+	${CXX} -c src/$@.cpp -o target/$@
+PayOff2:	PayOff2.cpp PayOff2.h MinMax
+	${CXX} -c src/$@.cpp -o target/$@
+	
 
-MonteCarlo2:	MonteCarlo2.cpp Random1.o PayOff.o
+MonteCarloMain1:	MonteCarloMain1.cpp Random1 PayOff1 MonteCarlo1
+	${CXX} -c src/$@.cpp -o target/$@.o
+	${CXX} -o target/$@ target/$@.o target/Random1 target/PayOff1 target/MonteCarlo1 target/MinMax
+MonteCarlo1:	MonteCarlo1.cpp Random1 PayOff1
 	${CXX} -c src/$@.cpp -o target/$@
 
-PayOff.o:	PayOff1.cpp PayOff1.h MinMax.o
-	${CXX} -c src/PayOff1.cpp -o target/$@
-
-MonteCarlo1:	MonteCarlo1.cpp Random1.o
+MonteCarloMain:	MonteCarloMain.cpp Random1 PayOff1 MinMax
 	${CXX} -c src/$@.cpp -o target/$@.o
-	${CXX} -o target/$@ target/$@.o target/Random1.o
+	${CXX} -o target/$@ target/$@.o target/Random1 target/PayOff1 target/MinMax
 
-MinMax.o:	MinMax.cpp MinMax.h
-	${CXX} -c src/MinMax.cpp -o target/$@
+PayOff1:	PayOff1.cpp PayOff1.h MinMax
+	${CXX} -c src/$@.cpp -o target/$@
 
-Random1.o:	Random1.cpp Random1.h
-	${CXX} -c src/Random1.cpp -o target/$@
+MinMax:	MinMax.cpp MinMax.h
+	${CXX} -c src/$@.cpp -o target/$@
+
+Random1:	Random1.cpp Random1.h
+	${CXX} -c src/$@.cpp -o target/$@
 
 clean:
 	${RM} target/*

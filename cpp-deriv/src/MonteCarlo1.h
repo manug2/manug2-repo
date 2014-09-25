@@ -1,7 +1,7 @@
 #ifndef SIMPLEMC_H
 #define SIMPLEMC_H
 
-#include "PayOff2.h"
+#include "PayOff1.h"
 
 double MonteCarlo1(const PayOff& thePayOff,
 		double Expiry,
