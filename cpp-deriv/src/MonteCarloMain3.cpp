@@ -1,6 +1,7 @@
 #include "Random1.h"
 #include "PayOff2.h"
 #include "MonteCarlo2.h"
+#include "DoubleDigital.h"
 #include <iostream>
 #include <cmath>
 using namespace std;
@@ -8,7 +9,7 @@ using namespace std;
 int main()
 {
 	double Expiry;
-	double Strike;
+	double Low, Up;
 	double Spot;
 	double Vol;
 	double r;
@@ -17,8 +18,11 @@ int main()
 	cout << endl << "Enter " << "expiry :";
 	cin >> Expiry;
 
-	cout << endl << "Enter " << "Strike :";
-	cin >> Strike;
+	cout << endl << "Enter " << "Lower barrier :";
+	cin >> Low;
+
+	cout << endl << "Enter " << "Upper barrier :";
+	cin >> Up;
 
 	cout << endl << "Enter " << "Spot :";
 	cin >> Spot;
@@ -32,13 +36,9 @@ int main()
 	cout << endl << "Enter " << "NumberOfPaths :";
 	cin >> NumberOfPaths;
 
-	PayOffCall callPayOff (Strike);
-	double resultCall = MonteCarlo2(callPayOff, Expiry, Spot, Vol, r, NumberOfPaths);
-	cout << endl << "the call price is " << resultCall << endl;
-
-	PayOffPut putPayOff (Strike);
-	double resultPut = MonteCarlo2(putPayOff, Expiry, Spot, Vol, r, NumberOfPaths);
-	cout << endl << "the put price is " << resultPut << endl;
+	PayOffDoubleDigital payOff (Low, Up);
+	double resultPut = MonteCarlo2(payOff, Expiry, Spot, Vol, r, NumberOfPaths);
+	cout << endl << "the DD price is " << resultPut << endl;
 
 	double tmp;
 	cin >> tmp;

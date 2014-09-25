@@ -3,7 +3,7 @@
 
 #include "PayOff2.h"
 
-double MonteCarlo1(const PayOff& thePayOff,
+double MonteCarlo2(const PayOff& thePayOff,
 		double Expiry,
 		double Spot,
 		double Vol,

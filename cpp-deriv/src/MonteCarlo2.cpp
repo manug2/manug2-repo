@@ -7,7 +7,7 @@
 using namespace std;
 #endif
 
-double MonteCarlo1(const PayOff& thePayOff,
+double MonteCarlo2(const PayOff& thePayOff,
 		double Expiry,
 		double Spot,
 		double Vol,
