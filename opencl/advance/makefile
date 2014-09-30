@@ -9,12 +9,22 @@ VPATH=src:src/wrap
 
 TARGET_DIR="../target"
 
-all:	hello sqi mavgsum1 mavgsum4
+all:	mavgsum8 mavgsum8_dp
+
+mavgsum8_dp:	mavgsum8_dp.cpp WrapOpenCL.o
+	$(CXX) $(CPPFLAGS) -c src/$@.cpp -o target/$@.o
+	$(COPY) src/$@.cl target/
+	$(CXX) $(LDFLAGS) -o target/$@ target/$@.o target/WrapOpenCL.o -framework opencl
+
+mavgsum8:	mavgsum8.cpp WrapOpenCL.o
+	$(CXX) $(CPPFLAGS) -c src/$@.cpp -o target/$@.o
+	$(COPY) src/$@.cl target/
+	$(CXX) $(LDFLAGS) -o target/$@ target/$@.o target/WrapOpenCL.o -framework opencl
 
 mavgsum4:	mavgsum4.cpp WrapOpenCL.o
-	$(CXX) $(CPPFLAGS) -c src/mavgsum4.cpp -o target/$@.o
-	$(COPY) src/mavgsum4.cl target/
-	$(CXX) $(LDFLAGS) -o target/$@ target/mavgsum4.o target/WrapOpenCL.o -framework opencl
+	$(CXX) $(CPPFLAGS) -c src/$@.cpp -o target/$@.o
+	$(COPY) src/$@.cl target/
+	$(CXX) $(LDFLAGS) -o target/$@ target/$@.o target/WrapOpenCL.o -framework opencl
 
 mavgsum1:	mavgsum1.cpp WrapOpenCL.o
 	$(CXX) $(CPPFLAGS) -c src/mavgsum1.cpp -o target/$@.o
