@@ -26,13 +26,13 @@ private:
 
         cl_kernel kernel;
         cl_context context;
-        cl_command_queue command_queue;
 	cl_event ev;
 
 	cl_mem memobjs[10];
 	uint num_of_memobjs;
 
 public:
+        cl_command_queue command_queue;
 	void print();
 
 	~WrapOpenCL();
@@ -40,6 +40,7 @@ public:
 	WrapOpenCL(int memSize, char* kernelName);
 
 	void	initCL();
+	void	initCL(int queueSetting);
 	void	invoke();
 	void	invoke(int global_size, int local_size);
 	int 	getMemSize();
@@ -49,6 +50,7 @@ public:
 	void	writeBuffer(cl_mem memobj, cl_bool blocking_write, size_t offset, size_t buf_size, void *ptr, cl_uint num_of_events_in_wait_list, cl_event *event_wait_list);
 
 	static char *	parseArgument(int argc, char* argv[]); 
+	cl_kernel	createAdditionalKernel();
 	
 
 };

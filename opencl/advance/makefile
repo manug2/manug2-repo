@@ -9,7 +9,12 @@ VPATH=src:src/wrap
 
 TARGET_DIR="../target"
 
-all:	mavgsum8 mavgsum8_dp
+all:	mavgsum8_dp mavgsum8_tp
+
+mavgsum8_tp:	mavgsum8_tp.cpp WrapOpenCL.o
+	$(CXX) $(CPPFLAGS) -c src/$@.cpp -o target/$@.o
+	$(COPY) src/mavgsum4.cl target/
+	$(CXX) $(LDFLAGS) -o target/$@ target/$@.o target/WrapOpenCL.o -framework opencl
 
 mavgsum8_dp:	mavgsum8_dp.cpp WrapOpenCL.o
 	$(CXX) $(CPPFLAGS) -c src/$@.cpp -o target/$@.o

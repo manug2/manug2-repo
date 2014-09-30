@@ -103,6 +103,10 @@ int WrapOpenCL::getMemSize() {
 }
 
 void WrapOpenCL::initCL() {
+	initCL(0);
+}
+
+void WrapOpenCL::initCL(int queueSetting) {
 
 	cl_int ret;
 	size_t source_size;
@@ -126,7 +130,7 @@ void WrapOpenCL::initCL() {
 	cout << endl << "Create Context : " << ret;
 #endif
 
-	this->command_queue = clCreateCommandQueue(context, device_id, 0, &ret);
+	this->command_queue = clCreateCommandQueue(context, device_id, queueSetting, &ret);
 #ifdef DEBUG
 	cout << endl << "Create Command Queue : " << ret;
 #endif
@@ -210,3 +214,13 @@ WrapOpenCL::~WrapOpenCL() {
 	
 }
 
+cl_kernel WrapOpenCL::createAdditionalKernel()
+{
+	cl_kernel k;
+	cl_int ret;
+	k = clCreateKernel(this->program, this->kernelName, &ret);
+#ifdef DEBUG
+	cout << endl << "Create Additional Kernel : " << ret;
+#endif
+	return k;
+}

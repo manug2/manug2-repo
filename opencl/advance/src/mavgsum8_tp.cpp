@@ -30,7 +30,7 @@ printf("Argument count = [%d]\n", argc);
         pn = WrapOpenCL::parseArgument(argc, argv);
 
         WrapOpenCL wrapper(pn);
-        wrapper.initCL();
+        wrapper.initCL(CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
 
         /* ***************************************
         Code specific to problem at hand STARTS
@@ -53,11 +53,16 @@ for (int i=0; i<data_num; i++) {
 	cout <<endl;
 
 	int *sums; //Unused, but required by mavgsum4.cl
-	printf("# of Records = [%d], # of windows = [%d]\n", data_num, window_num);
+	printf("# of Records = [%d], # of windows = [%d]\n", data_num, window_num1);
 	result1 = (float*) malloc(point_num * sizeof(float)); //data rows * 4 items per row
 	result2 = (float*) malloc(point_num * sizeof(float)); //data rows * 4 items per row
 	sums = (int*) malloc(point_num * sizeof(int));
 
+
+	cl_kernel k2;
+	k2 = wrapper.createAdditionalKernel();
+	cl_int ret;
+	cl_event ev2;
 
 	memobj = wrapper.createBuffer(CL_MEM_READ_WRITE, point_num * sizeof(int), NULL);
 	memobj1 = wrapper.createBuffer(CL_MEM_WRITE_ONLY, point_num * sizeof(int), NULL);
@@ -73,13 +78,13 @@ for (int i=0; i<data_num; i++) {
 	wrapper.invoke();
 	cout << endl << "after invoking kernel..";
 
-	wrapper.setKernelArg(0, sizeof(cl_mem), (void*) &memobj);
-	wrapper.setKernelArg(1, sizeof(cl_mem), (void*) &memobj1);
-	wrapper.setKernelArg(2, sizeof(cl_mem), (void*) &memobj3);
-	wrapper.setKernelArg(3, sizeof(int), (void*) &data_num);
-	wrapper.setKernelArg(4, sizeof(int), (void*) &window_num2);
-	wrapper.invoke();
-	cout << endl << "after invoking kernel..";
+	ret = clSetKernelArg(k2, 0, sizeof(cl_mem), (void*) &memobj);
+	ret = clSetKernelArg(k2, 1, sizeof(cl_mem), (void*) &memobj1);
+	ret = clSetKernelArg(k2, 2, sizeof(cl_mem), (void*) &memobj3);
+	ret = clSetKernelArg(k2, 3, sizeof(int), (void*) &data_num);
+	ret = clSetKernelArg(k2, 4, sizeof(int), (void*) &window_num2);
+	ret = clEnqueueTask(wrapper.command_queue, k2, 0, NULL, &ev2);
+	cout << endl << "after invoking second kernel..";
 
 	wrapper.readBuffer(memobj1, CL_TRUE, 0, point_num * sizeof(int), sums, 0, NULL);
 	wrapper.readBuffer(memobj2, CL_TRUE, 0, point_num * sizeof(float), result1, 0, NULL);
@@ -88,12 +93,14 @@ for (int i=0; i<data_num; i++) {
 for (int i=0; i<window_num2-1; i++) {
 	cout << endl << "result [" << i << "]: ";
 	for (int j=0; j < name_num; j++)
-		cout << result1[i*name_num + j] < result2[i*name_num + j] << "\t";
+		cout << (result1[i*name_num + j] < result2[i*name_num + j]) << "\t";
 }
 
 free(sums);
 free(result1);
 free(result2);
+ret = clReleaseKernel(k2);
+
         /* ***************************************
         Code specific to problem at hand ENDS
         *************************************** */
