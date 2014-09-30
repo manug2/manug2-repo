@@ -88,7 +88,20 @@ for (int i=0; i<data_num; i++) {
 
 	wrapper.readBuffer(memobj1, CL_TRUE, 0, point_num * sizeof(int), sums, 0, NULL);
 	wrapper.readBuffer(memobj2, CL_TRUE, 0, point_num * sizeof(float), result1, 0, NULL);
-	wrapper.readBuffer(memobj3, CL_TRUE, 0, point_num * sizeof(float), result2, 0, NULL);
+	ret = clEnqueueReadBuffer(wrapper.command_queue, memobj3, CL_TRUE, 0,
+		point_num * sizeof(float), result2, 0, &ev2, NULL);
+
+for (int i=0; i<data_num; i++) {
+	cout << endl << "result [" << i << "]: ";
+	for (int j=0; j < name_num; j++)
+		cout << result1[i*name_num + j] << "\t";
+}
+
+for (int i=0; i<data_num; i++) {
+	cout << endl << "result [" << i << "]: ";
+	for (int j=0; j < name_num; j++)
+		cout << result2[i*name_num + j] << "\t";
+}
 
 for (int i=0; i<window_num2-1; i++) {
 	cout << endl << "result [" << i << "]: ";
