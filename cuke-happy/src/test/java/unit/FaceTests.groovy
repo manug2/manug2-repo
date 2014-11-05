@@ -6,8 +6,6 @@ import org.junit.runner.RunWith;
 import org.spockframework.runtime.Sputnik;
 import spock.lang.Specification
 
-import java.awt.dnd.InvalidDnDOperationException;
-
 @RunWith(Sputnik)
 class FaceTests extends Specification {
 
@@ -96,9 +94,9 @@ class FaceTests extends Specification {
     def "cannot get matrix for un-loaded face" () {
         when:
         def face = new HappyFace("face1.txt", 5)
-        def matrix = face.getMatrix()
+        face.getMatrix()
         then:
-        def e = thrown(InvalidDnDOperationException)
+        def e = thrown(RuntimeException)
         expect: e.getMessage() == "matrix requested is invalid before loading. did you call load()?"
     }
 

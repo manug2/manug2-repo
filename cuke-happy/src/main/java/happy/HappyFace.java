@@ -1,8 +1,6 @@
 package happy;
 
-import java.awt.dnd.InvalidDnDOperationException;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.List;
 import java.nio.file.Paths;
 import java.nio.charset.StandardCharsets;
@@ -56,7 +54,7 @@ public class HappyFace {
 
     public int[][] getMatrix() {
         if (!loaded)
-            throw new InvalidDnDOperationException("matrix requested is invalid before loading. did you call load()?");
+            throw new RuntimeException("matrix requested is invalid before loading. did you call load()?");
         else
             return matrix;
     }
