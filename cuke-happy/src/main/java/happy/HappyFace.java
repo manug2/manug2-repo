@@ -1,6 +1,7 @@
 package happy;
 
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.List;
 import java.nio.file.Paths;
 import java.nio.charset.StandardCharsets;
@@ -45,7 +46,7 @@ public class HappyFace {
     private boolean loaded = false;
     private final String path;
     private int[][] matrix;
-    private int elements; //Number of elements per side in the square matrix
+    private final int elements; //Number of elements per side in the square matrix
     private final String data;
 
     public boolean isLoaded() {
@@ -95,6 +96,41 @@ public class HappyFace {
                 }
             }
         }
+    }
+
+    public void print() {
+        if (!loaded)
+            throw new RuntimeException("cannot print before loading. did you call load()?");
+        StringBuilder builder = new StringBuilder();
+        for (int i=0; i < elements; i++) {
+            if(builder.length()>0)
+                builder.append("\n");
+            for (int j=0; j < elements; j++)
+                builder.append(matrix[i][j]).append(' ');
+        }
+        System.out.println(builder.toString());
+    }
+
+    public int elementCount() {
+        return elements;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other == null)
+            return false;
+        else if (other == this)
+            return true;
+        else if (! (other instanceof HappyFace))
+            return false;
+
+        HappyFace o = (HappyFace) other;
+        if ( !(o.loaded && this.loaded ))
+            throw new RuntimeException("cannot compare two faces before loading. did you call load()?");
+
+        int[][] mat1 = this.getMatrix();
+        int[][] mat2 = this.getMatrix();
+        return Arrays.equals(mat1, mat2);
     }
 
 }

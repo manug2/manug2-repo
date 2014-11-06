@@ -19,7 +19,8 @@ public class HappySteps {
             fileNameB.append(".txt");
         System.out.println(String.format("Using face file [%s]", fileNameB.toString()));
 
-        solver.loadFace(fileNameB.toString());
+        HappyFace face = new HappyFace(fileNameB.toString(), solver.elementCount());
+        solver.loadFace(face);
     }
 
     @When("^I say solve the cube$")

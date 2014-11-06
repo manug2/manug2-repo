@@ -132,4 +132,45 @@ class FaceTests extends Specification {
         true == asExpected
     }
 
+    def "face can print" () {
+        def face = HappyFace.createFromString("0 1 0;1 0 1;1 1 1", 3);
+        face.load()
+        face.print()
+        expect: true
+    }
+
+    def "face can rotate" () {
+        def face = HappyFace.createFromString("0 1 0;1 0 1;1 1 1", 3);
+        face.load()
+        face.rotate()
+        expect: true
+    }
+
+    def "face has name" () {
+        def face = HappyFace.createFromString("0 1 0;1 0 1;1 1 1", 3);
+        face.load()
+        face.name()
+        expect: true
+    }
+
+    def "face is not equal to null" () {
+        def face = HappyFace.createFromString("0 1 0;1 0 1;1 1 1", 3);
+        face.load()
+        expect: face.equals(null)
+    }
+
+    def "face is equal to self" () {
+        def face = HappyFace.createFromString("0 1 0;1 0 1;1 1 1", 3);
+        face.load()
+        expect: face.equals(face)
+    }
+
+    def "face is equal to similar face" () {
+        def face1 = HappyFace.createFromString("0 1 0;1 0 1;1 1 1", 3);
+        def face2 = HappyFace.createFromString("0 1 0;1 0 1;1 1 1", 3);
+        face1.load()
+        face2.load()
+        expect: face1.equals(face2)
+    }
+
 }
