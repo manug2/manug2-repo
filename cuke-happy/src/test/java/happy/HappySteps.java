@@ -19,7 +19,7 @@ public class HappySteps {
             fileNameB.append(".txt");
         System.out.println(String.format("Using face file [%s]", fileNameB.toString()));
 
-        HappyFace face = new HappyFace(fileNameB.toString(), solver.elementCount());
+        HappyFace face = HappyFace.createFromFile(fileNameB.toString(), solver.elementCount());
         solver.loadFace(face);
     }
 

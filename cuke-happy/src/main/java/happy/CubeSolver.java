@@ -34,27 +34,40 @@ public class CubeSolver {
             return ;
         if (faces.size()!=6)
             throw new AssertionError("the cube needs six faces");
-        else
-            throw new AssertionError("Not yet implemented");
+
+        //May optimise if two or more rotations lead to same matrix
+
+        CombiFace anchor = new CombiFace(faces.get(0));
+        anchor.print();
+        final int facesToTry = faces.size() - 1;
+
+        for (int i=0; i <2; i++) {
+            boolean left=false, bottom = false, right=false, top = false;
+            for (int j=1; j <= facesToTry; j++) {
+                HappyFace face = faces.get(j);
+                if (!left) {
+                    try {
+                        if (anchor.match(face, FaceDirection.Left)) {
+                            System.out.println(String.format("Found match face #[%d] on [%s]", j, FaceDirection.Left));
+                            face.print();
+                            left = true;
+                            break;
+                        } else
+                            face = face.rotate();
+                    } catch (InvalidRotationException e) {
+                         System.out.println(String.format("Out of rotations for face #[%d], while trying to match on [%s]", j, FaceDirection.Left));
+                    }
+                }
+            }
+            anchor.flip();
+        }
+        anchor.print();
+        throw new AssertionError("Not yet implemented");
     }
 
-    public boolean match(int index1, int index2) {
-        if (index1>= faces.size())
-            throw new AssertionError(String.format("the cube does not have face with index [%s]", index1));
-        else if (index2>= faces.size())
-            throw new AssertionError(String.format("the cube does not have face with index [%s]", index2));
-
-        faces.get(index1).print();
-        faces.get(index2).print();
-
-        int[][] face1 = faces.get(index1).getMatrix();
-        int[][] face2 = faces.get(index1).getMatrix();
-        for (int i=0; i < elements; i++) {
-            if ( (face1[0][i] + face2[elements-1][i]) != 1 )
-                return false;
-        }
-
-        return true;
+    public void printFaces() {
+        for (HappyFace face : faces)
+            face.print();
     }
 
 }

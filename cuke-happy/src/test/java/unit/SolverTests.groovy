@@ -35,14 +35,14 @@ class SolverTests extends Specification {
 
     def "solver can load a face"() {
         def solver = new CubeSolver(5)
-        solver.loadFace(new HappyFace("src/test/resources/testFiles/face1.txt", 5))
+        solver.loadFace(HappyFace.createFromFile("src/test/resources/testFiles/face1.txt", 5))
         expect : true
     }
 
     def "solver cannot load a bad face"() {
         when: "we have a solver"
         def solver = new CubeSolver(5)
-        solver.loadFace(new HappyFace("bad_bad.txt", 5))
+        solver.loadFace(HappyFace.createFromFile("bad_bad.txt", 5))
         then:
         thrown(IOException)
     }
@@ -50,7 +50,7 @@ class SolverTests extends Specification {
         when: "we have a solver"
         def solver = new CubeSolver(5)
         for ( i in [0, 1, 2, 3, 4, 5, 6] )
-            solver.loadFace(new HappyFace("src/test/resources/testFiles/face1.txt", 5))
+            solver.loadFace(HappyFace.createFromFile("src/test/resources/testFiles/face1.txt", 5))
         then:
         def e = thrown(AssertionError)
         expect:e.getMessage() == "cannot load more than 6 faces"
@@ -69,7 +69,7 @@ class SolverTests extends Specification {
         when: "we have a solver"
         def solver = new CubeSolver(5)
         for ( i in [0, 1] )
-            solver.loadFace(new HappyFace("src/test/resources/testFiles/face1.txt", 5))
+            solver.loadFace(HappyFace.createFromFile("src/test/resources/testFiles/face1.txt", 5))
         solver.solve()
         then:
         def e = thrown(AssertionError)
@@ -80,7 +80,7 @@ class SolverTests extends Specification {
         when: "we have a solver"
         def solver = new CubeSolver(5)
         for ( i in [0, 1, 2] )
-            solver.loadFace(new HappyFace("src/test/resources/testFiles/face1.txt", 5))
+            solver.loadFace(HappyFace.createFromFile("src/test/resources/testFiles/face1.txt", 5))
         solver.solve()
         then:
         def e = thrown(AssertionError)
@@ -91,7 +91,7 @@ class SolverTests extends Specification {
         when: "we have a solver"
         def solver = new CubeSolver(5)
         for ( i in [0, 1, 2, 3] )
-            solver.loadFace(new HappyFace("src/test/resources/testFiles/face1.txt", 5))
+            solver.loadFace(HappyFace.createFromFile("src/test/resources/testFiles/face1.txt", 5))
         solver.solve()
         then:
         def e = thrown(AssertionError)
@@ -102,7 +102,7 @@ class SolverTests extends Specification {
         when: "we have a solver"
         def solver = new CubeSolver(5)
         for ( i in [0, 1, 2, 3, 4] )
-            solver.loadFace(new HappyFace("src/test/resources/testFiles/face1.txt", 5))
+            solver.loadFace(HappyFace.createFromFile("src/test/resources/testFiles/face1.txt", 5))
         solver.solve()
         then:
         def e = thrown(AssertionError)
@@ -112,7 +112,7 @@ class SolverTests extends Specification {
     def "solver cannot load face with diff number of elements"() {
         when: "we have a solver"
         def solver = new CubeSolver(3)
-        solver.loadFace(new HappyFace("src/test/resources/testFiles/face1.txt", 5))
+        solver.loadFace(HappyFace.createFromFile("src/test/resources/testFiles/face1.txt", 5))
         then:
         def e = thrown(AssertionError)
         expect: e.getMessage() == "the cube needs faces with [3] elements"

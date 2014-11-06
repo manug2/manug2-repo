@@ -15,26 +15,26 @@ class FaceTests extends Specification {
     }
 
     def "there is a face with source"() {
-        def face = new HappyFace("face1.txt", 5)
+        def face = HappyFace.createFromFile("face1.txt", 5)
         expect : face!=null
     }
 
     def "face should load" () {
-        def face = new HappyFace("src/test/resources/testFiles/face1.txt", 5)
+        def face = HappyFace.createFromFile("src/test/resources/testFiles/face1.txt", 5)
         face.load()
         expect:
         face.isLoaded() == true
     }
 
     def "face is un-loaded" () {
-        def face = new HappyFace("face1.txt", 5)
+        def face = HappyFace.createFromFile("face1.txt", 5)
         expect:
         face.isLoaded() == false
     }
 
     def "bad face cannot be loaded" () {
         when:
-        def face = new HappyFace("face1---1.xxy", 5)
+        def face = HappyFace.createFromFile("face1---1.xxy", 5)
         face.load()
         then:
         thrown(IOException)
@@ -42,7 +42,7 @@ class FaceTests extends Specification {
 
     def "blank face does not load" () {
         when:
-        def face = new HappyFace("src/test/resources/testFiles/blank.txt", 5)
+        def face = HappyFace.createFromFile("src/test/resources/testFiles/blank.txt", 5)
         face.load()
         then:
         def e = thrown(AssertionError)
@@ -52,7 +52,7 @@ class FaceTests extends Specification {
 
     def "incomplete face does not load" () {
         when:
-        def face = new HappyFace("src/test/resources/testFiles/incompleteCols.txt", 5)
+        def face = HappyFace.createFromFile("src/test/resources/testFiles/incompleteCols.txt", 5)
         face.load()
         then:
         def e = thrown(AssertionError)
@@ -62,7 +62,7 @@ class FaceTests extends Specification {
 
     def "loaded face should have 5 rows" () {
         when:
-        def face = new HappyFace("src/test/resources/testFiles/face1.txt", 5)
+        def face = HappyFace.createFromFile("src/test/resources/testFiles/face1.txt", 5)
         face.load()
         def matrix = face.getMatrix()
         then:
@@ -71,7 +71,7 @@ class FaceTests extends Specification {
 
     def "loaded face should have 5 items in each rows" () {
         when:
-        def face = new HappyFace("src/test/resources/testFiles/face1.txt", 5)
+        def face = HappyFace.createFromFile("src/test/resources/testFiles/face1.txt", 5)
         face.load()
         def matrix = face.getMatrix()
         def asExpected = true
@@ -83,7 +83,7 @@ class FaceTests extends Specification {
 
     def "loaded incomplete face does not have 4 rows" () {
         when:
-        def face = new HappyFace("src/test/resources/testFiles/incompleteRows.txt", 4)
+        def face = HappyFace.createFromFile("src/test/resources/testFiles/incompleteRows.txt", 4)
         face.load()
         then:
         def e = thrown(AssertionError)
@@ -93,11 +93,11 @@ class FaceTests extends Specification {
 
     def "cannot get matrix for un-loaded face" () {
         when:
-        def face = new HappyFace("face1.txt", 5)
+        def face = HappyFace.createFromFile("face1.txt", 5)
         face.getMatrix()
         then:
         def e = thrown(RuntimeException)
-        expect: e.getMessage() == "matrix requested is invalid before loading. did you call load()?"
+        expect: e.getMessage() == "face data is not loaded. did you call load()?"
     }
 
     def "create a face using input string"() {
@@ -142,21 +142,21 @@ class FaceTests extends Specification {
     def "face can rotate" () {
         def face = HappyFace.createFromString("0 1 0;1 0 1;1 1 1", 3);
         face.load()
-        face.rotate()
+        face.rotateCW()
         expect: true
     }
 
-    def "face has name" () {
+    def "face has identifier" () {
         def face = HappyFace.createFromString("0 1 0;1 0 1;1 1 1", 3);
         face.load()
-        face.name()
+        face.identifier()
         expect: true
     }
 
     def "face is not equal to null" () {
         def face = HappyFace.createFromString("0 1 0;1 0 1;1 1 1", 3);
         face.load()
-        expect: face.equals(null)
+        expect: false == face.equals(null)
     }
 
     def "face is equal to self" () {
@@ -165,12 +165,103 @@ class FaceTests extends Specification {
         expect: face.equals(face)
     }
 
-    def "face is equal to similar face" () {
+    def "face is not equal to an identical face" () {
+        when: "we have two faces, with same data"
         def face1 = HappyFace.createFromString("0 1 0;1 0 1;1 1 1", 3);
         def face2 = HappyFace.createFromString("0 1 0;1 0 1;1 1 1", 3);
         face1.load()
         face2.load()
-        expect: face1.equals(face2)
+        face1.print()
+        face2.print()
+        then:
+        true == face1.identical(face2)
+        false == face1.equals(face2)
+    }
+
+    def "faces are identical" () {
+        def face1 = HappyFace.createFromString("0 1 0;1 0 1;1 1 1", 3)
+        def face2 = HappyFace.createFromString("0 1 0;1 0 1;1 1 1", 3)
+        face1.load()
+        face2.load()
+        expect: true == face1.identical(face2)
+    }
+
+    def "face has column" () {
+        def face = HappyFace.createFromString("0 1 0;1 0 1;1 1 1", 3)
+        face.load()
+        face.getColumns(0)
+        expect: true
+    }
+    def "face has row"() {
+        def face = HappyFace.createFromString("0 1 0;1 0 1;1 1 1", 3)
+        face.load()
+        face.getRows(0)
+        expect: true
+    }
+
+    def "unloaded face does not have column" () {
+        when:
+        def face = HappyFace.createFromString("0 1 0;1 0 1;1 1 1", 3)
+        face.getColumns(0)
+        then:
+        def e = thrown(RuntimeException)
+        expect: e.getMessage() == "face data is not loaded. did you call load()?"
+    }
+    def "unloaded face does not have row"() {
+        when:
+        def face = HappyFace.createFromString("0 1 0;1 0 1;1 1 1", 3)
+        face.getRows(0)
+        then:
+        def e = thrown(RuntimeException)
+        expect: e.getMessage() == "face data is not loaded. did you call load()?"
+    }
+
+    def "face does not have invalid column" () {
+        when:
+        def face = HappyFace.createFromString("0 1 0;1 0 1;1 1 1", 3)
+        face.load()
+        face.getColumns(10)
+        then:
+        def e = thrown(RuntimeException)
+        expect: e.getMessage() == "face number of elements is limited to [3], but requested for [10]"
+    }
+
+    def "face does not have invalid row" () {
+        when:
+        def face = HappyFace.createFromString("0 1 0;1 0 1;1 1 1", 3)
+        face.load()
+        face.getRows(10)
+        then:
+        def e = thrown(RuntimeException)
+        expect: e.getMessage() == "face number of elements is limited to [3], but requested for [10]"
+    }
+
+    def "2x2 face has expected columns" () {
+        def face = HappyFace.createFromString("0 1;1 0", 2)
+        face.load()
+        expect:
+        ([0, 1] == face.getColumns(0)) && ([1, 0] == face.getColumns(1))
+    }
+
+    def "2x2 face has expected rows" () {
+        def face = HappyFace.createFromString("0 1;1 1", 2)
+        face.load()
+        expect:
+        ([0, 1] == face.getRows(0)) && ([1, 1] == face.getRows(1))
+    }
+
+    def "3x3 face has expected columns" () {
+        def face = HappyFace.createFromString("0 1 0;1 0 1;1 1 1", 3)
+        face.load()
+        expect:
+        ([0, 1, 1] == face.getColumns(0)) && ([1, 0, 1] == face.getColumns(1)) && ([0, 1, 1] == face.getColumns(2))
+    }
+
+    def "3x3 face has expected rows" () {
+        def face = HappyFace.createFromString("0 1 0;1 0 1;1 1 1", 3)
+        face.load()
+        expect:
+        ([0, 1, 0] == face.getRows(0)) && ([1, 0, 1] == face.getRows(1)) && ([1, 1, 1] == face.getRows(2))
     }
 
 }
