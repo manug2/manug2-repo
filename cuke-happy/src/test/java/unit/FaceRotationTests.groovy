@@ -168,4 +168,14 @@ class FaceRotationTests extends Specification {
         ([0, 1, 0] == rotatedFace.getColumns(0)) && ([1, 0, 1] == rotatedFace.getColumns(1)) && ([1, 1, 1] == rotatedFace.getColumns(2))
     }
 
+    def "3x3 face has expected columns after vertical flipping" () {
+        def face = HappyFace.createFromString("1 1 0;1 0 1;0 1 1", 3)
+        face.load()
+        face.print()
+        def flippedFace = face.verticalFlip()
+        flippedFace.print()
+        expect:
+        ([0, 1, 1] == flippedFace.getColumns(0)) && ([1, 0, 1] == flippedFace.getColumns(1)) && ([1, 1, 0] == flippedFace.getColumns(2))
+    }
+
 }

@@ -37,31 +37,33 @@ public class CubeSolver {
 
         //May optimise if two or more rotations lead to same matrix
 
-        CombiFace anchor = new CombiFace(faces.get(0));
-        anchor.print();
+        CombiFace origAnchor = new CombiFace(faces.get(0));
+        origAnchor.print();
         final int facesToTry = faces.size() - 1;
 
         for (int i=0; i <2; i++) {
+            CombiFace anchor = origAnchor.clone();
             boolean left=false, bottom = false, right=false, top = false;
             for (int j=1; j <= facesToTry; j++) {
                 HappyFace face = faces.get(j);
-                if (!left) {
+                while (!left) {
                     try {
                         if (anchor.match(face, FaceDirection.Left)) {
-                            System.out.println(String.format("Found match face #[%d] on [%s]", j, FaceDirection.Left));
-                            face.print();
+                            anchor.print();
                             left = true;
                             break;
                         } else
                             face = face.rotate();
                     } catch (InvalidRotationException e) {
                          System.out.println(String.format("Out of rotations for face #[%d], while trying to match on [%s]", j, FaceDirection.Left));
+                        break;
                     }
                 }
             }
+            anchor.print();
             anchor.flip();
         }
-        anchor.print();
+        origAnchor.print();
         throw new AssertionError("Not yet implemented");
     }
 

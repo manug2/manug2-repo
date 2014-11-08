@@ -4,6 +4,13 @@ import happy.CubeSolver
 import happy.HappyFace
 import org.junit.runner.RunWith
 
+/**
+ * Created with IntelliJ IDEA.
+ * User: 1301121
+ * Date: 11/5/14
+ * Time: 4:05 PM
+ * To change this template use File | Settings | File Templates.
+ */
 import org.spockframework.runtime.Sputnik
 import spock.lang.Specification
 

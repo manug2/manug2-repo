@@ -50,7 +50,7 @@ public class HappyFace {
     private boolean loaded = false;
     private final String path;
     private int[][] matrix;
-    private final int elements; //Number of elements per side in the square matrix
+    protected final int elements; //Number of elements per side in the square matrix
     private final String data;
     private final int id;
     private int[][] columns;
@@ -68,6 +68,8 @@ public class HappyFace {
     }
 
     public void load() throws IOException {
+        if(loaded)
+            throw new AssertionError(String.format("attempt to load already loaded face [%d]", id));
         String[] lines;
         if (path!=null) {
             List<String> list = Files.readAllLines(Paths.get(path), StandardCharsets.UTF_8);
@@ -109,18 +111,24 @@ public class HappyFace {
         }
     }
 
-    public void print() {
-        if (!loaded)
-            throw new RuntimeException("cannot print before loading. did you call load()?");
+    @Override
+    public String toString() {
         StringBuilder builder = new StringBuilder(this.getClass().getCanonicalName());
-        builder.append('[').append(id).append(',').append(this).append("]");
-        for (int i=0; i < elements; i++) {
+        if (!loaded) {
+            builder.append('[').append(id).append(',').append(this).append("]");
+        } else {
+            builder.append('[').append(id).append(',').append(System.identityHashCode(this)).append("]");
+            for (int i=0; i < elements; i++) {
+                builder.append("\n");
+                for (int j=0; j < elements; j++)
+                    builder.append(matrix[i][j]).append(' ');
+            }
             builder.append("\n");
-            for (int j=0; j < elements; j++)
-                builder.append(matrix[i][j]).append(' ');
         }
-        builder.append("\n");
-        System.out.println(builder.toString());
+        return builder.toString();
+    }
+    public void print() {
+        System.out.println(this.toString());
     }
 
     public int elementCount() {
@@ -207,7 +215,8 @@ public class HappyFace {
     }
 
     public HappyFace flip() {
-        //simple rotation clock-wise
+        //following implementation maybe wrong
+        //ideally row 1 should become last row and second becomes second last..
         int[][] m = new int[elements][elements];
 
         for (int i=0; i < elements; i++) {
@@ -270,30 +279,66 @@ public class HappyFace {
         if (direction == FaceDirection.Left) {
             side1 = getColumns(0);
             side2 = other.getColumns(elements-1);
-            for (int i=0; i < elements; i++)
-                sum += side1[i] + side2[i];
+            for (int i=0; i < elements; i++) {
+                int ts = side1[i] + side2[i];
+                if (ts <= 1)
+                    sum += ts;
+                else
+                    return false;
+            }
         }
         else if (direction == FaceDirection.Bottom) {
             side1 = getRows(elements-1);
             side2 = other.getRows(0);
-            for (int i=0; i < elements; i++)
-                sum += side1[i] + side2[i];
+            for (int i=0; i < elements; i++) {
+                int ts = side1[i] + side2[i];
+                if (ts <= 1)
+                    sum += ts;
+                else
+                    return false;
+            }
         }
         else if (direction == FaceDirection.Right) {
             side1 = getColumns(elements-1);
             side2 = other.getColumns(0);
-            for (int i=0; i < elements; i++)
-                sum += side1[i] + side2[i];
+            for (int i=0; i < elements; i++) {
+                int ts = side1[i] + side2[i];
+                if (ts <= 1)
+                    sum += ts;
+                else
+                    return false;
+            }
         }
         else if (direction == FaceDirection.Top) {
             side1 = getRows(0);
             side2 = other.getRows(elements-1);
-            for (int i=0; i < elements; i++)
-                sum += side1[i] + side2[i];
+            for (int i=0; i < elements; i++) {
+                int ts = side1[i] + side2[i];
+                if (ts <= 1)
+                    sum += ts;
+                else
+                    return false;
+            }
         } else
-            throw new AssertionError("Only directions supported are from 0 to 3");
+            throw new AssertionError("Only directions supported to HappyFace are Left, Bottom, Right, Top");
 
-        return sum == elements;
+        return sum <= elements;//sum may not be equal to number of elements, when there are two blanks. so condition may be changed to <=
+    }
+
+    public HappyFace clone() {
+        return new HappyFace(elements, id, matrix);
+    }
+
+    public HappyFace verticalFlip() {
+        int[][] m = new int[elements][elements];
+        int middle = elements/2;
+
+        for (int i=0; i < elements; i++) {
+            for (int j=0; j < middle; j++) {
+                m[i][j] = matrix[elements-i][j];
+            }
+        }
+        return new HappyFace(elements, id, m);
     }
 
 }

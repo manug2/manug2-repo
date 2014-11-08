@@ -146,35 +146,10 @@ class CombiFaceTests extends Specification {
         expect: [0, 1, 1] == anchor.getRows(0)
     }
 
-    def "anchor can detach a face"() {
-        def face = HappyFace.createFromString("0 1 0;1 0 0;1 1 1", 3)
-        face.load()
-        def anchor = new CombiFace(face)
-        def face1 = HappyFace.createFromString("0 1 1;1 0 0;0 1 0", 3)
-        face1.load()
-        anchor.match(face1, FaceDirection.Left)
-        anchor.detach(FaceDirection.Left)
-        expect: [0, 1, 1] == anchor.getColumns(0)
-    }
-
-    def "anchor cannot detach a non-attached face"() {
-        when:
-        def face = HappyFace.createFromString("0 1 0;1 0 0;1 1 1", 3)
-        face.load()
-        def anchor = new CombiFace(face)
-        anchor.detach(FaceDirection.Left)
-        then:
-        def e = thrown(RuntimeException)
-        e.getMessage() == "No face was attached to side [Left]"
-    }
     def "anchor can print"() {
         def face = HappyFace.createFromString("0 1 0;1 0 0;1 1 1", 3)
         face.load()
         def anchor = new CombiFace(face)
-        //def face1 = HappyFace.createFromString("0 1 1;1 0 0;0 1 0", 3)
-        //face1.load()
-        //anchor.match(face1, FaceDirection.Left)
-
         anchor.print();
         expect : true
     }
@@ -186,6 +161,44 @@ class CombiFaceTests extends Specification {
         then:
         def e = thrown(RuntimeException)
         e.getMessage() == "face data is not loaded. did you call load()?"
+    }
+    def "anchor can print when left attached face"() {
+        def face = HappyFace.createFromString("0 1 0;1 0 0;1 1 1", 3)
+        face.load()
+        def anchor = new CombiFace(face)
+        def face1 = HappyFace.createFromString("0 1 1;1 0 0;0 1 0", 3)
+        face1.load()
+        expect : true  == anchor.match(face1, FaceDirection.Left)
+        anchor.print();
+    }
+
+    def "anchor can print when bottom attached face"() {
+        def face = HappyFace.createFromString("0 1 1;1 0 0;1 1 0", 3)
+        face.load()
+        def anchor = new CombiFace(face)
+        def face1 = HappyFace.createFromString("0 0 1;1 0 1;1 1 1", 3)
+        face1.load()
+        expect : true  == anchor.match(face1, FaceDirection.Bottom)
+        anchor.print();
+    }
+    def "anchor can print when right attached face"() {
+        def face = HappyFace.createFromString("0 0 1;1 0 1;1 1 1", 3)
+        face.load()
+        def anchor = new CombiFace(face)
+        def face1 = HappyFace.createFromString("0 1 0;0 0 1;0 1 0", 3)
+        face1.load()
+        expect : true  == anchor.match(face1, FaceDirection.Right)
+        anchor.print();
+    }
+
+    def "anchor can print when top attached face"() {
+        def face = HappyFace.createFromString("0 0 1;1 0 1;1 1 1", 3)
+        face.load()
+        def anchor = new CombiFace(face)
+        def face1 = HappyFace.createFromString("0 1 1;1 0 0;1 1 0", 3)
+        face1.load()
+        expect : true  == anchor.match(face1, FaceDirection.Top)
+        anchor.print();
     }
 
 }

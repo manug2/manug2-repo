@@ -264,4 +264,13 @@ class FaceTests extends Specification {
         ([0, 1, 0] == face.getRows(0)) && ([1, 0, 1] == face.getRows(1)) && ([1, 1, 1] == face.getRows(2))
     }
 
+    def "3x3 face can clone a face"() {
+        def face = HappyFace.createFromString("0 1 0;1 0 0;1 1 1", 3)
+        face.load()
+        def face1 = face.clone()
+        expect:
+        true == face.equals(face1)
+        true == face.identical(face1)
+    }
+
 }
