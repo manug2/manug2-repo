@@ -331,13 +331,13 @@ public class HappyFace {
 
     public HappyFace verticalFlip() {
         int[][] m = new int[elements][elements];
-        int middle = elements/2;
 
         for (int i=0; i < elements; i++) {
-            for (int j=0; j < middle; j++) {
-                m[i][j] = matrix[elements-i][j];
+            for (int j=0; j < elements; j++) {
+                m[i][j] = matrix[i][elements-1-j];
             }
         }
+
         return new HappyFace(elements, id, m);
     }
 
