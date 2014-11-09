@@ -19,9 +19,11 @@ class CombiAttachmentTests extends Specification {
         face1.load()
         def face2 = HappyFace.createFromString("0 1 0;0 0 1;1 1 0", 3)
         face2.load()
+        face2.print()
 
         expect :
         anchor.match(face1, FaceDirection.Top)
+        anchor.print()
         anchor.match(face2, FaceDirection.Right)
         anchor.print()
     }
@@ -92,12 +94,13 @@ class CombiAttachmentTests extends Specification {
         def anchor = new CombiFace(face)
         def face1 = HappyFace.createFromString("0 0 1;1 0 0;0 1 0", 3)
         face1.load()
-        def face2 = HappyFace.createFromString("0 1 0;0 0 1;0 0 1", 3)
+        def face2 = HappyFace.createFromString("0 1 0;1 0 1;0 0 1", 3)
         face2.load()
+        face2.print()
         expect :
         anchor.match(face1, FaceDirection.Left)
-        anchor.match(face2, FaceDirection.Top)
         anchor.print()
+        anchor.match(face2, FaceDirection.Top)
     }
 
     def "anchor can print when left, top and right attached face"() {
@@ -106,17 +109,17 @@ class CombiAttachmentTests extends Specification {
         def anchor = new CombiFace(face)
         def face1 = HappyFace.createFromString("0 0 1;1 0 0;0 1 0", 3)
         face1.load()
-        def face2 = HappyFace.createFromString("0 1 0;0 0 1;0 0 1", 3)
+        def face2 = HappyFace.createFromString("0 1 0;1 0 1;0 0 1", 3)
         face2.load()
         def face3 = HappyFace.createFromString("0 0 1;1 0 1;0 0 1", 3)
         face3.load()
+        face3.print()
 
         expect :
         anchor.match(face1, FaceDirection.Left)
         anchor.match(face2, FaceDirection.Top)
         anchor.print()
         anchor.match(face3, FaceDirection.Right)
-        anchor.print()
     }
 
     def "anchor can print when left, top, right and bottom attached face"() {
@@ -125,13 +128,13 @@ class CombiAttachmentTests extends Specification {
         def anchor = new CombiFace(face)
         def face1 = HappyFace.createFromString("0 0 1;1 0 0;0 1 0", 3)
         face1.load()
-        def face2 = HappyFace.createFromString("0 1 0;0 0 1;0 0 1", 3)
+        def face2 = HappyFace.createFromString("0 1 0;1 0 1;0 0 1", 3)
         face2.load()
         def face3 = HappyFace.createFromString("0 0 1;1 0 1;0 0 1", 3)
         face3.load()
         def face4 = HappyFace.createFromString("0 1 0;0 0 1;1 0 0", 3)
         face4.load()
-
+        face4.print()
         expect :
         anchor.match(face1, FaceDirection.Left)
         anchor.match(face2, FaceDirection.Top)
@@ -147,7 +150,7 @@ class CombiAttachmentTests extends Specification {
         def anchor = new CombiFace(face)
         def face1 = HappyFace.createFromString("0 0 1;1 0 0;0 1 0", 3)
         face1.load()
-        def face2 = HappyFace.createFromString("0 1 0;0 0 1;0 0 1", 3)
+        def face2 = HappyFace.createFromString("0 1 0;1 0 1;0 0 1", 3)
         face2.load()
         def face3 = HappyFace.createFromString("0 0 1;1 0 0;0 0 1", 3)
         face3.load()
@@ -179,7 +182,7 @@ class CombiAttachmentTests extends Specification {
         anchor.match(face1, FaceDirection.Left)
         anchor.print()
         face2.print()
-        anchor.checkEdge(FaceDirection.Left, face2, FaceDirection.Top)
+        anchor.checkEdges(FaceDirection.Left, face2, FaceDirection.Top)
     }
 
     def "can reverse an array"() {
@@ -198,21 +201,22 @@ class CombiAttachmentTests extends Specification {
         expect :
         anchor.match(face1, FaceDirection.Bottom)
         anchor.print()
-        anchor.checkEdge(FaceDirection.Bottom, face2, FaceDirection.Top)
+        anchor.checkEdges(FaceDirection.Bottom, face2, FaceDirection.Top)
     }
 
     def "anchor check edge is OK when attaching top and right already attached"() {
         def face = HappyFace.createFromString("0 1 0;1 0 0;1 0 1", 3)
         face.load()
         def anchor = new CombiFace(face)
-        def face1 = HappyFace.createFromString("0 1 0;0 0 1;0 0 1", 3)
+        def face1 = HappyFace.createFromString("0 1 0;0 0 1;0 1 0", 3)
         face1.load()
         def face2 = HappyFace.createFromString("0 1 0;0 1 0;0 0 1", 3)
         face2.load()
+        face2.print()
         expect :
         anchor.match(face1, FaceDirection.Right)
         anchor.print()
-        anchor.checkEdge(FaceDirection.Right, face2, FaceDirection.Top)
+        anchor.checkEdges(FaceDirection.Right, face2, FaceDirection.Top)
     }
 
     def "anchor gives error when attaching top and top already attached"() {
@@ -225,7 +229,7 @@ class CombiAttachmentTests extends Specification {
         def face2 = HappyFace.createFromString("0 1 0;0 0 1;0 0 1", 3)
         face2.load()
         anchor.match(face1, FaceDirection.Right)
-        anchor.checkEdge(FaceDirection.Top, face2, FaceDirection.Top)
+        anchor.checkEdges(FaceDirection.Top, face2, FaceDirection.Top)
         then :
         def e = thrown(RuntimeException)
         e.getMessage() == "cannot check edges when same direction given for existing and new face"
@@ -239,11 +243,11 @@ class CombiAttachmentTests extends Specification {
         face1.load()
         def face2 = HappyFace.createFromString("0 0 1;1 0 0;1 0 1", 3)
         face2.load()
+        face2.print()
         expect :
         anchor.match(face1, FaceDirection.Bottom)
         anchor.print()
-        face2.print()
-        anchor.checkEdge(FaceDirection.Bottom, face2, FaceDirection.Right)
+        anchor.checkEdges(FaceDirection.Bottom, face2, FaceDirection.Right)
     }
 
     def "anchor gives error when checking right and bottom already attached"() {
@@ -258,7 +262,7 @@ class CombiAttachmentTests extends Specification {
         anchor.match(face1, FaceDirection.Bottom)
         anchor.print()
         face2.print()
-        anchor.checkEdge(FaceDirection.Bottom, face2, FaceDirection.Right)
+        anchor.checkEdges(FaceDirection.Bottom, face2, FaceDirection.Right)
         then:
         def e = thrown(FaceNotMatchingException)
         e.getMessage() == "face [Bottom] and [Right] not matching because of element at edge with index [0]"
@@ -276,7 +280,7 @@ class CombiAttachmentTests extends Specification {
         face2.print()
         anchor.match(face1, FaceDirection.Bottom)
         anchor.print()
-        anchor.checkEdge(FaceDirection.Bottom, face2, FaceDirection.Left)
+        anchor.checkEdges(FaceDirection.Bottom, face2, FaceDirection.Left)
         then:
         def e = thrown(FaceNotMatchingException)
         e.getMessage() == "face [Bottom] and [Left] not matching because of element at edge with index [1]"
@@ -294,7 +298,7 @@ class CombiAttachmentTests extends Specification {
         face2.print()
         anchor.match(face1, FaceDirection.Bottom)
         anchor.print()
-        anchor.checkEdge(FaceDirection.Bottom, face2, FaceDirection.Left)
+        anchor.checkEdges(FaceDirection.Bottom, face2, FaceDirection.Left)
         then:
         def e = thrown(FaceNotMatchingException)
         e.getMessage() == "face [Bottom] and [Left] not matching because of element at edge with index [2] is present in both"
@@ -313,7 +317,7 @@ class CombiAttachmentTests extends Specification {
         anchor.match(face1, FaceDirection.Bottom)
         anchor.print()
         face2.print()
-        anchor.checkEdge(FaceDirection.Bottom, face2, FaceDirection.Left)
+        anchor.checkEdges(FaceDirection.Bottom, face2, FaceDirection.Left)
     }
 
     def "anchor gives error during check edge when parallel is attached after adding all other faces"() {

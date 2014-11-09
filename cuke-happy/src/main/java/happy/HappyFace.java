@@ -342,4 +342,13 @@ public class HappyFace {
         return new HappyFace(elements, id, m);
     }
 
+    public static int[] reverseArray(int[] input) {
+        if (input==null)
+            throw new AssertionError("input for reversing is null");
+        int[] output = new int[input.length];
+        for (int i=0; i < input.length; i++)
+            output[i] = input[input.length-1-i];
+        return output;
+    }
+
 }
