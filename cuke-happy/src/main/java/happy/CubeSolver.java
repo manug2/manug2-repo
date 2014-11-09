@@ -48,12 +48,14 @@ public class CubeSolver {
                 HappyFace face = faces.get(j);
                 while (!left) {
                     try {
-                        if (anchor.match(face, FaceDirection.Left)) {
+                        try {
+                            anchor.match(face, FaceDirection.Left);
                             anchor.print();
                             left = true;
                             break;
-                        } else
+                        } catch (FaceNotMatchingException fe){
                             face = face.rotate();
+                        }
                     } catch (InvalidRotationException e) {
                          System.out.println(String.format("Out of rotations for face #[%d], while trying to match on [%s]", j, FaceDirection.Left));
                         break;

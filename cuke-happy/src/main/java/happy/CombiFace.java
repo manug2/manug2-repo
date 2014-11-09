@@ -6,7 +6,7 @@ import java.util.Map.Entry;
 
 public class CombiFace extends HappyFace {
     public CombiFace(HappyFace anchor) {
-        super(anchor.elementCount(), anchor.identifier(), anchor.getMatrix());
+        super(anchor.elementCount(), anchor.identifier(), anchor.getMatrix());//, anchor.getRotation());
 
         sideFaceMap = new HashMap<FaceDirection, HappyFace>(5);
         effectiveMatrix = new int[anchor.elementCount()][anchor.elementCount()];
@@ -45,9 +45,9 @@ public class CombiFace extends HappyFace {
     }
 
     @Override
-    public boolean match(final HappyFace face, final FaceDirection direction) {
+    public void match(final HappyFace face, final FaceDirection direction) {
         if (equals(face) || face==null)
-            return false;
+            throw new RuntimeException("other face is null, cannot attempt matching");
 
         //Matches faces to this anchor, and all adjacent sides
         //Also attaches the matched face to the anchor, which is this object
@@ -56,70 +56,65 @@ public class CombiFace extends HappyFace {
         if (FaceDirection.Parallel.equals(direction)){
             matched = matchParallel(face);
         } else {
-            matched = super.match(face, direction);
-            if(!matched)
-                return false;
+            super.match(face, direction);
 
             final HappyFace left = getLeft();
             final HappyFace top = getTop();
             final HappyFace right = getRight();
             final HappyFace bottom = getBottom();
             if (FaceDirection.Left.equals(direction) && top!=null)
-                matched &= top.match(face.rotateCW(), FaceDirection.Left);
-            if (matched && FaceDirection.Left.equals(direction) && bottom!=null)
-                matched &= bottom.match(face.rotateCC(), FaceDirection.Left);
+                top.match(face.rotateCW(), FaceDirection.Left);
+            if (FaceDirection.Left.equals(direction) && bottom!=null)
+                bottom.match(face.rotateCC(), FaceDirection.Left);
 
-            if (matched && FaceDirection.Bottom.equals(direction) && left!=null)
-                matched &= left.match(face.rotateCW(), FaceDirection.Bottom);
-            if (matched && FaceDirection.Bottom.equals(direction) && right!=null)
-                matched &= right.match(face.rotateCC(), FaceDirection.Bottom);
+            if (FaceDirection.Bottom.equals(direction) && left!=null)
+                left.match(face.rotateCW(), FaceDirection.Bottom);
+            if (FaceDirection.Bottom.equals(direction) && right!=null)
+                right.match(face.rotateCC(), FaceDirection.Bottom);
 
-            if (matched && FaceDirection.Right.equals(direction) && bottom!=null)
-                matched &= bottom.match(face.rotateCW(), FaceDirection.Right);
-            if (matched && FaceDirection.Right.equals(direction) && top!=null)
-                matched &= top.match(face.rotateCC(), FaceDirection.Right);
+            if (FaceDirection.Right.equals(direction) && bottom!=null)
+                bottom.match(face.rotateCW(), FaceDirection.Right);
+            if (FaceDirection.Right.equals(direction) && top!=null)
+                top.match(face.rotateCC(), FaceDirection.Right);
 
-            if (matched && FaceDirection.Top.equals(direction) && left!=null)
-                matched &= left.match(face.rotateCW(), FaceDirection.Top);
-            if (matched && FaceDirection.Top.equals(direction) && right!=null)
-                matched &= right.match(face.rotateCC(), FaceDirection.Top);
-
-        }
-
-        if (matched) {
-            if (sideFaceMap.containsKey(direction))
-                throw new RuntimeException(String.format("a matching face already attached on [%s]", direction.toString()));
-
-            sideFaceMap.put(direction, face);
-            switch(direction) {
-                case Left  :
-                    effectiveMatrix[0][0] = 1;//change to sum of two incoming sides
-                    effectiveMatrix[elements-1][0] = 1;
-                    break;
-                case Bottom:
-                    effectiveMatrix[elements-1][0] = 1;
-                    effectiveMatrix[elements-1][elements-1] = 1;
-                    break;
-                case Right  :
-                    effectiveMatrix[0][elements-1] = 1;
-                    effectiveMatrix[elements-1][elements-1] = 1;
-                    break;
-                case Top:
-                    effectiveMatrix[0][0] = 1;
-                    effectiveMatrix[0][elements-1] = 1;
-                    break;
-                case Parallel:
-                    //effective matrix does not change as it does not touch anchor
-                    break;
-            }
-            for (int i=0; i <super.elements; i++) {
-                for (int j=0; j<super.elements; j++) {
-                    effectiveColumns[j][i] = effectiveMatrix[i][j];
-                }
-            }
+            if (FaceDirection.Top.equals(direction) && left!=null)
+                left.match(face.rotateCW(), FaceDirection.Top);
+            if (FaceDirection.Top.equals(direction) && right!=null)
+                right.match(face.rotateCC(), FaceDirection.Top);
 
         }
-        return matched;
+
+        if (sideFaceMap.containsKey(direction))
+            throw new RuntimeException(String.format("a matching face already attached on [%s]", direction.toString()));
+
+        sideFaceMap.put(direction, face);
+        switch(direction) {
+            case Left  :
+                effectiveMatrix[0][0] = 1;//change to sum of two incoming sides
+                effectiveMatrix[elements-1][0] = 1;
+                break;
+            case Bottom:
+                effectiveMatrix[elements-1][0] = 1;
+                effectiveMatrix[elements-1][elements-1] = 1;
+                break;
+            case Right  :
+                effectiveMatrix[0][elements-1] = 1;
+                effectiveMatrix[elements-1][elements-1] = 1;
+                break;
+            case Top:
+                effectiveMatrix[0][0] = 1;
+                effectiveMatrix[0][elements-1] = 1;
+                break;
+            case Parallel:
+                //effective matrix does not change as it does not touch anchor
+                break;
+        }
+        for (int i=0; i <super.elements; i++) {
+            for (int j=0; j<super.elements; j++) {
+                effectiveColumns[j][i] = effectiveMatrix[i][j];
+            }
+        }
+
     }
 
     @Override

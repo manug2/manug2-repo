@@ -268,10 +268,9 @@ public class HappyFace {
                      F(CW(CW((CW(O))))
      */
 
-    public boolean match(HappyFace other, FaceDirection direction) {
-
+    public void match(HappyFace other, FaceDirection direction) {
         if (equals(other) || other==null)
-            return false;
+            throw new RuntimeException("other face is null, cannot attempt matching");
 
         int sum = 0;
         int[] side1, side2;
@@ -284,7 +283,7 @@ public class HappyFace {
                 if (ts <= 1)
                     sum += ts;
                 else
-                    return false;
+                    throw new FaceNotMatchingException(String.format("face [%d, %d] not matching when attached on side [%s] because of element [%d]", id, rotation, direction, i));
             }
         }
         else if (direction == FaceDirection.Bottom) {
@@ -295,7 +294,7 @@ public class HappyFace {
                 if (ts <= 1)
                     sum += ts;
                 else
-                    return false;
+                    throw new FaceNotMatchingException(String.format("face [%d, %d] not matching when attached on side [%s] because of element [%d]", id, rotation, direction, i));
             }
         }
         else if (direction == FaceDirection.Right) {
@@ -306,7 +305,7 @@ public class HappyFace {
                 if (ts <= 1)
                     sum += ts;
                 else
-                    return false;
+                    throw new FaceNotMatchingException(String.format("face [%d, %d] not matching when attached on side [%s] because of element [%d]", id, rotation, direction, i));
             }
         }
         else if (direction == FaceDirection.Top) {
@@ -317,12 +316,14 @@ public class HappyFace {
                 if (ts <= 1)
                     sum += ts;
                 else
-                    return false;
+                    throw new FaceNotMatchingException(String.format("face [%d, %d] not matching when attached on side [%s] because of element [%d]", id, rotation, direction, i));
             }
         } else
-            throw new AssertionError("Only directions supported to HappyFace are Left, Bottom, Right, Top");
+            throw new FaceNotMatchingException(String.format("face [%d, %d] not matching when attached on side [%s], direction not known", id, rotation, direction));
 
-        return sum <= elements;//sum may not be equal to number of elements, when there are two blanks. so condition may be changed to <=
+        if (sum>elements)
+            throw new FaceNotMatchingException(String.format("face [%d, %d] not matching when attached on side [%s] because of overlapping elements", id, rotation, direction));
+
     }
 
     public HappyFace clone() {

@@ -21,8 +21,8 @@ class CombiAttachmentTests extends Specification {
         face2.load()
 
         expect :
-        true  == anchor.match(face1, FaceDirection.Top)
-        true  == anchor.match(face2, FaceDirection.Right)
+        anchor.match(face1, FaceDirection.Top)
+        anchor.match(face2, FaceDirection.Right)
         anchor.print()
     }
 
@@ -95,8 +95,8 @@ class CombiAttachmentTests extends Specification {
         def face2 = HappyFace.createFromString("0 1 0;0 0 1;0 0 1", 3)
         face2.load()
         expect :
-        true  == anchor.match(face1, FaceDirection.Left)
-        true  == anchor.match(face2, FaceDirection.Top)
+        anchor.match(face1, FaceDirection.Left)
+        anchor.match(face2, FaceDirection.Top)
         anchor.print()
     }
 
@@ -112,10 +112,10 @@ class CombiAttachmentTests extends Specification {
         face3.load()
 
         expect :
-        true  == anchor.match(face1, FaceDirection.Left)
-        true  == anchor.match(face2, FaceDirection.Top)
+        anchor.match(face1, FaceDirection.Left)
+        anchor.match(face2, FaceDirection.Top)
         anchor.print()
-        true  == anchor.match(face3, FaceDirection.Right)
+        anchor.match(face3, FaceDirection.Right)
         anchor.print()
     }
 
@@ -133,11 +133,11 @@ class CombiAttachmentTests extends Specification {
         face4.load()
 
         expect :
-        true  == anchor.match(face1, FaceDirection.Left)
-        true  == anchor.match(face2, FaceDirection.Top)
-        true  == anchor.match(face3, FaceDirection.Right)
+        anchor.match(face1, FaceDirection.Left)
+        anchor.match(face2, FaceDirection.Top)
+        anchor.match(face3, FaceDirection.Right)
         anchor.print()
-        true  == anchor.match(face4, FaceDirection.Bottom)
+        anchor.match(face4, FaceDirection.Bottom)
         anchor.print()
     }
 
@@ -158,12 +158,12 @@ class CombiAttachmentTests extends Specification {
         face5.print()
 
         expect :
-        true  == anchor.match(face1, FaceDirection.Left)
-        true  == anchor.match(face2, FaceDirection.Top)
-        true  == anchor.match(face3, FaceDirection.Right)
-        true  == anchor.match(face4, FaceDirection.Bottom)
+        anchor.match(face1, FaceDirection.Left)
+        anchor.match(face2, FaceDirection.Top)
+        anchor.match(face3, FaceDirection.Right)
+        anchor.match(face4, FaceDirection.Bottom)
         anchor.print()
-        true  == anchor.match(face5, FaceDirection.Parallel)
+        anchor.match(face5, FaceDirection.Parallel)
         anchor.print()
     }
 
@@ -176,7 +176,7 @@ class CombiAttachmentTests extends Specification {
         def face2 = HappyFace.createFromString("0 1 0;1 0 1;0 0 1", 3)
         face2.load()
         expect :
-        true  == anchor.match(face1, FaceDirection.Left)
+        anchor.match(face1, FaceDirection.Left)
         anchor.print()
         face2.print()
         anchor.checkEdge(FaceDirection.Left, face2, FaceDirection.Top)
@@ -224,7 +224,7 @@ class CombiAttachmentTests extends Specification {
         face1.load()
         def face2 = HappyFace.createFromString("0 1 0;0 0 1;0 0 1", 3)
         face2.load()
-        true  == anchor.match(face1, FaceDirection.Right)
+        anchor.match(face1, FaceDirection.Right)
         anchor.checkEdge(FaceDirection.Top, face2, FaceDirection.Top)
         then :
         def e = thrown(RuntimeException)
@@ -333,10 +333,10 @@ class CombiAttachmentTests extends Specification {
         face5.print()
 
         expect :
-        true  == anchor.match(face1, FaceDirection.Left)
-        true  == anchor.match(face2, FaceDirection.Top)
-        true  == anchor.match(face3, FaceDirection.Right)
-        true  == anchor.match(face4, FaceDirection.Bottom)
+        anchor.match(face1, FaceDirection.Left)
+        anchor.match(face2, FaceDirection.Top)
+        anchor.match(face3, FaceDirection.Right)
+        anchor.match(face4, FaceDirection.Bottom)
         anchor.print()
         anchor.checkEdgeParallel(face5, FaceDirection.Parallel)
 
