@@ -254,26 +254,31 @@ public class CombiFace extends HappyFace {
             return;
 
         int[] side1, side2;
-        int edgeElement;
+        int parallelEdgeElement, anchorEdgeElement;
         if (FaceDirection.Top.equals(direction)) {
             side1 = existing.getRows(0);
             side2 = face.getColumns(0);
-            edgeElement = effectiveMatrix[0][0];
+            anchorEdgeElement = effectiveMatrix[0][0] + side2[elements - 1];
+            parallelEdgeElement = side1[0] + side2[0];
+            side2 = reverseArray(side2); //For comparing elements inside the edges
         } else if (FaceDirection.Bottom.equals(direction)) {
-            side1 = reverseArray(existing.getRows(elements - 1));
+            side1 = existing.getRows(elements - 1);
             side2 = face.getColumns(0);
-            edgeElement = effectiveMatrix[elements-1][0];
+            anchorEdgeElement = effectiveMatrix[0][0] + side2[0];
+            parallelEdgeElement = side1[0] + side2[elements - 1];
+            side2 = reverseArray(side2); //For comparing elements inside the edges
         } else
             return ;
+
+        if (anchorEdgeElement != 1)
+            throw new FaceNotMatchingException(String.format("face [%s] and [%s] not matching because of elements at anchor edge", FaceDirection.Left, direction));
+        else if (parallelEdgeElement > 1)
+            throw new FaceNotMatchingException(String.format("face [%s] and [%s] not matching because of element at parallel edge is present in both", FaceDirection.Left, direction));
 
         for (int i=1; i < elements-1; i++) {
             if ((side1[i] + side2[i]) != 1)
                 throw new FaceNotMatchingException(String.format("face [%s] and [%s] not matching because of element at edge with index [%d]", FaceDirection.Left, direction, i));
         }
-        if ( edgeElement + side2[0] > 1)
-            throw new FaceNotMatchingException(String.format("face [%s] and [%s] not matching because of element at edge with index [%d] is present in both", FaceDirection.Left, direction, 0));
-        else if ( side1[elements-1] + side2[elements-1] > 1)
-            throw new FaceNotMatchingException(String.format("face [%s] and [%s] not matching because of element at edge with index [%d] is present in both", FaceDirection.Left, direction, elements-1));
     }
 
     public void checkEdgeBottom(HappyFace face, FaceDirection direction) {
@@ -281,26 +286,30 @@ public class CombiFace extends HappyFace {
         if (existing==null)
             return;
         int[] side1, side2;
-        int edgeElement;
+        int parallelEdgeElement, anchorEdgeElement;
         if (FaceDirection.Left.equals(direction)) {
             side1 = existing.getColumns(0);
-            side2 = reverseArray(face.getRows(elements - 1));
-            edgeElement = effectiveMatrix[elements-1][0];
+            side2 = face.getRows(elements - 1);
+            anchorEdgeElement = effectiveMatrix[0][0] + side2[elements - 1];
+            parallelEdgeElement = side1[elements - 1] + side2[0];
+            side2 = reverseArray(side2); //For comparing elements inside the edges
         } else if (FaceDirection.Right.equals(direction)) {
             side1 = existing.getColumns(elements - 1);
             side2 = face.getRows(elements - 1);
-            edgeElement = effectiveMatrix[elements-1][elements - 1];
+            anchorEdgeElement = effectiveMatrix[0][0] + side2[0];
+            parallelEdgeElement = side1[elements - 1] + side2[elements - 1];
         } else
             return ;
+
+        if (anchorEdgeElement != 1)
+            throw new FaceNotMatchingException(String.format("face [%s] and [%s] not matching because of elements at anchor edge", FaceDirection.Bottom, direction));
+        else if (parallelEdgeElement > 1)
+            throw new FaceNotMatchingException(String.format("face [%s] and [%s] not matching because of element at parallel edge is present in both", FaceDirection.Bottom, direction));
 
         for (int i=1; i < elements-1; i++) {
             if ((side1[i] + side2[i]) != 1)
                 throw new FaceNotMatchingException(String.format("face [%s] and [%s] not matching because of element at edge with index [%d]", FaceDirection.Bottom, direction, i));
         }
-        if (edgeElement + side2[0] > 1)
-            throw new FaceNotMatchingException(String.format("face [%s] and [%s] not matching because of element at edge with index [%d] is present in both", FaceDirection.Bottom, direction, 0));
-        else if (side2[elements-1] + side2[elements-1] > 1)
-            throw new FaceNotMatchingException(String.format("face [%s] and [%s] not matching because of element at edge with index [%d] is present in both", FaceDirection.Bottom, direction, elements-1));
     }
 
     public void checkEdgeRight(HappyFace face, FaceDirection direction) {
@@ -308,26 +317,30 @@ public class CombiFace extends HappyFace {
         if (existing==null)
             return;
         int[] side1, side2;
-        int edgeElement;
+        int parallelEdgeElement, anchorEdgeElement;
         if (FaceDirection.Top.equals(direction)) {
             side1 = existing.getRows(0);
-            side2 = reverseArray(face.getColumns(elements - 1));
-            edgeElement = effectiveMatrix[0][elements - 1];
+            side2 = face.getColumns(elements - 1);
+            anchorEdgeElement = effectiveMatrix[0][0] + side2[elements - 1];
+            parallelEdgeElement = side1[elements - 1] + side2[0];
+            side2 = reverseArray(side2); //For comparing elements inside the edges
         } else if (FaceDirection.Bottom.equals(direction)) {
             side1 = existing.getRows(elements - 1);
             side2 = face.getColumns(elements - 1);
-            edgeElement = effectiveMatrix[elements-1][elements - 1];
+            anchorEdgeElement = effectiveMatrix[0][0] + side2[0];
+            parallelEdgeElement = side1[elements-1] + side2[elements-1];
         } else
             return ;
+
+        if (anchorEdgeElement != 1)
+            throw new FaceNotMatchingException(String.format("face [%s] and [%s] not matching because of elements at anchor edge", FaceDirection.Right, direction));
+        else if (parallelEdgeElement > 1)
+            throw new FaceNotMatchingException(String.format("face [%s] and [%s] not matching because of element at parallel edge is present in both", FaceDirection.Right, direction));
 
         for (int i=1; i < elements-1; i++) {
             if ((side1[i] + side2[i]) != 1)
                 throw new FaceNotMatchingException(String.format("face [%s] and [%s] not matching because of element at edge with index [%d]", FaceDirection.Right, direction, i));
         }
-        if (edgeElement + side2[0] > 1)
-            throw new FaceNotMatchingException(String.format("face [%s] and [%s] not matching because of element at edge with index [%d] is present in both", FaceDirection.Right, direction, 0));
-        else if (side2[elements-1] + side2[elements-1] > 1)
-            throw new FaceNotMatchingException(String.format("face [%s] and [%s] not matching because of element at edge with index [%d] is present in both", FaceDirection.Right, direction, elements-1));
     }
 
     public void checkEdgeTop(HappyFace face, FaceDirection direction) {
@@ -335,26 +348,30 @@ public class CombiFace extends HappyFace {
         if (existing==null)
             return;
         int[] side1, side2;
-        int edgeElement;
+        int parallelEdgeElement, anchorEdgeElement;
         if (FaceDirection.Left.equals(direction)) {
-            side1 = reverseArray(existing.getColumns(0));
+            side1 = existing.getColumns(0);
             side2 = face.getRows(0);
-            edgeElement = effectiveMatrix[0][0];
+            anchorEdgeElement = effectiveMatrix[0][0] + side2[elements - 1];
+            parallelEdgeElement = side1[0] + side2[0];
         } else if (FaceDirection.Right.equals(direction)) {
-            side1 = reverseArray(existing.getColumns(elements - 1));
+            side1 = existing.getColumns(elements - 1);
             side2 = face.getRows(0);
-            edgeElement = effectiveMatrix[0][elements - 1];
+            anchorEdgeElement = effectiveMatrix[0][elements - 1]+ side2[0];
+            parallelEdgeElement = side1[0] + side2[elements - 1];
+            side2 = reverseArray(side2); //For comparing elements inside the edges
         } else
             return ;
+
+        if (anchorEdgeElement != 1)
+            throw new FaceNotMatchingException(String.format("face [%s] and [%s] not matching because of elements at anchor edge", FaceDirection.Top, direction));
+        else if (parallelEdgeElement > 1)
+            throw new FaceNotMatchingException(String.format("face [%s] and [%s] not matching because of element at parallel edge is present in both", FaceDirection.Top, direction));
 
         for (int i=1; i < elements-1; i++) {
             if ((side1[i] + side2[i]) != 1)
                throw new FaceNotMatchingException(String.format("face [%s] and [%s] not matching because of element at edge with index [%d]", FaceDirection.Top, direction, i));
         }
-        if (edgeElement + side2[0] > 1)
-            throw new FaceNotMatchingException(String.format("face [%s] and [%s] not matching because of element at edge with index [%d] is present in both", FaceDirection.Top, direction, 0));
-        if (side2[elements-1] + side2[elements-1] > 1)
-            throw new FaceNotMatchingException(String.format("face [%s] and [%s] not matching because of element at edge with index [%d] is present in both", FaceDirection.Top, direction, elements-1));
     }
 
     public void checkEdgeParallel(HappyFace face, FaceDirection direction) {
@@ -388,7 +405,7 @@ public class CombiFace extends HappyFace {
             throw new FaceNotMatchingException(String.format("parallel face cannot be placed at [%s, %s] corner", FaceDirection.Bottom, FaceDirection.Right));
 
         else if ((parallelMatrix[0][elements-1] + rightSide[0] + topSide[elements-1]) != 1)
-            throw new FaceNotMatchingException(String.format("parallel face cannot fix at [%s, %s] corner", FaceDirection.Right, FaceDirection.Top));
+            throw new FaceNotMatchingException(String.format("parallel face cannot be placed at [%s, %s] corner", FaceDirection.Right, FaceDirection.Top));
 
         //Check the row/col elements except corners
         for (int i=1; i < elements-1; i++) {

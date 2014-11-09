@@ -265,7 +265,7 @@ class CombiAttachmentTests extends Specification {
         anchor.checkEdges(FaceDirection.Bottom, face2, FaceDirection.Right)
         then:
         def e = thrown(FaceNotMatchingException)
-        e.getMessage() == "face [Bottom] and [Right] not matching because of element at edge with index [0]"
+        e.getMessage() == "face [Bottom] and [Right] not matching because of elements at anchor edge"
     }
 
     def "anchor gives error when checking left and bottom already attached at index 1"() {
@@ -301,7 +301,7 @@ class CombiAttachmentTests extends Specification {
         anchor.checkEdges(FaceDirection.Bottom, face2, FaceDirection.Left)
         then:
         def e = thrown(FaceNotMatchingException)
-        e.getMessage() == "face [Bottom] and [Left] not matching because of element at edge with index [2] is present in both"
+        e.getMessage() == "face [Bottom] and [Left] not matching because of element at parallel edge is present in both"
 
     }
 
@@ -320,30 +320,115 @@ class CombiAttachmentTests extends Specification {
         anchor.checkEdges(FaceDirection.Bottom, face2, FaceDirection.Left)
     }
 
-    def "anchor gives error during check edge when parallel is attached after adding all other faces"() {
+    def "parallel face cannot be placed at [Left, Top] corner"() {
+        when:
         def face = HappyFace.createFromString("0 1 0;1 0 0;1 0 1", 3)
         face.load()
         def anchor = new CombiFace(face)
         def face1 = HappyFace.createFromString("0 0 1;1 0 0;0 1 0", 3)
         face1.load()
-        def face2 = HappyFace.createFromString("0 1 0;0 0 1;0 0 1", 3)
+        def face2 = HappyFace.createFromString("0 1 0;1 0 1;0 0 1", 3)
         face2.load()
         def face3 = HappyFace.createFromString("0 0 1;1 0 0;0 0 1", 3)
         face3.load()
         def face4 = HappyFace.createFromString("0 1 0;0 0 1;1 0 0", 3)
         face4.load()
-        def face5 = HappyFace.createFromString("1 0 0;0 1 1;0 1 0", 3)
+        def face5 = HappyFace.createFromString("0 0 0;0 1 1;0 1 0", 3)
         face5.load()
         face5.print()
 
-        expect :
         anchor.match(face1, FaceDirection.Left)
         anchor.match(face2, FaceDirection.Top)
         anchor.match(face3, FaceDirection.Right)
         anchor.match(face4, FaceDirection.Bottom)
         anchor.print()
         anchor.checkEdgeParallel(face5, FaceDirection.Parallel)
-
+        then:
+        def e = thrown(FaceNotMatchingException)
+        e.getMessage() == "parallel face cannot be placed at [Left, Top] corner"
     }
 
+    def "parallel face cannot be placed at [Right, Top] corner"() {
+        when:
+        def face = HappyFace.createFromString("0 1 0;1 0 0;1 0 1", 3)
+        face.load()
+        def anchor = new CombiFace(face)
+        def face1 = HappyFace.createFromString("0 0 1;1 0 0;0 1 0", 3)
+        face1.load()
+        def face2 = HappyFace.createFromString("0 1 0;1 0 1;0 0 1", 3)
+        face2.load()
+        def face3 = HappyFace.createFromString("0 0 1;1 0 0;0 0 1", 3)
+        face3.load()
+        def face4 = HappyFace.createFromString("0 1 0;0 0 1;1 0 0", 3)
+        face4.load()
+        def face5 = HappyFace.createFromString("1 0 1;0 1 1;0 1 0", 3)
+        face5.load()
+        face5.print()
+
+        anchor.match(face1, FaceDirection.Left)
+        anchor.match(face2, FaceDirection.Top)
+        anchor.match(face3, FaceDirection.Right)
+        anchor.match(face4, FaceDirection.Bottom)
+        anchor.print()
+        anchor.checkEdgeParallel(face5, FaceDirection.Parallel)
+        then:
+        def e = thrown(FaceNotMatchingException)
+        e.getMessage() == "parallel face cannot be placed at [Right, Top] corner"
+    }
+
+    def "parallel face cannot be placed at [Bottom, Right] corner"() {
+        when:
+        def face = HappyFace.createFromString("0 1 0;1 0 0;1 0 1", 3)
+        face.load()
+        def anchor = new CombiFace(face)
+        def face1 = HappyFace.createFromString("0 0 1;1 0 0;0 1 0", 3)
+        face1.load()
+        def face2 = HappyFace.createFromString("0 1 0;1 0 1;0 0 1", 3)
+        face2.load()
+        def face3 = HappyFace.createFromString("0 0 1;1 0 0;0 0 1", 3)
+        face3.load()
+        def face4 = HappyFace.createFromString("0 1 0;0 0 1;1 0 0", 3)
+        face4.load()
+        def face5 = HappyFace.createFromString("1 0 0;0 1 1;0 1 1", 3)
+        face5.load()
+        face5.print()
+
+        anchor.match(face1, FaceDirection.Left)
+        anchor.match(face2, FaceDirection.Top)
+        anchor.match(face3, FaceDirection.Right)
+        anchor.match(face4, FaceDirection.Bottom)
+        anchor.print()
+        anchor.checkEdgeParallel(face5, FaceDirection.Parallel)
+        then:
+        def e = thrown(FaceNotMatchingException)
+        e.getMessage() == "parallel face cannot be placed at [Bottom, Right] corner"
+    }
+
+    def "parallel face cannot be placed at [Left, Bottom] corner"() {
+        when:
+        def face = HappyFace.createFromString("0 1 0;1 0 0;1 0 1", 3)
+        face.load()
+        def anchor = new CombiFace(face)
+        def face1 = HappyFace.createFromString("0 0 1;1 0 0;0 1 0", 3)
+        face1.load()
+        def face2 = HappyFace.createFromString("0 1 0;1 0 1;0 0 1", 3)
+        face2.load()
+        def face3 = HappyFace.createFromString("0 0 1;1 0 0;0 0 1", 3)
+        face3.load()
+        def face4 = HappyFace.createFromString("0 1 0;0 0 1;1 0 0", 3)
+        face4.load()
+        def face5 = HappyFace.createFromString("1 0 0;0 1 1;1 1 0", 3)
+        face5.load()
+        face5.print()
+
+        anchor.match(face1, FaceDirection.Left)
+        anchor.match(face2, FaceDirection.Top)
+        anchor.match(face3, FaceDirection.Right)
+        anchor.match(face4, FaceDirection.Bottom)
+        anchor.print()
+        anchor.checkEdgeParallel(face5, FaceDirection.Parallel)
+        then:
+        def e = thrown(FaceNotMatchingException)
+        e.getMessage() == "parallel face cannot be placed at [Left, Bottom] corner"
+    }
 }
