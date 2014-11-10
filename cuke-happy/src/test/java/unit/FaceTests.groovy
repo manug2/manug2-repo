@@ -1,7 +1,7 @@
 package unit
 
 import happy.HappyFace
-
+import org.junit.Assert
 import org.junit.runner.RunWith;
 import org.spockframework.runtime.Sputnik;
 import spock.lang.Specification
@@ -272,5 +272,24 @@ class FaceTests extends Specification {
         true == face.equals(face1)
         true == face.identical(face1)
     }
+
+    def "face cannot have top side with all '0'" () {
+        when:
+        def face = HappyFace.createFromString("0 0 0;1 0 1;1 1 1", 3)
+        face.load()
+        then:
+        def e = thrown(AssertionError)
+        e.getMessage() == "all items in row [0] are '0'"
+    }
+
+    def "face cannot have right side with all '0'" () {
+        when:
+        def face = HappyFace.createFromString("1 1 0;1 0 0;1 1 0", 3)
+        face.load()
+        then:
+        def e = thrown(AssertionError)
+        e.getMessage() == "all items in column [2] are '0'"
+    }
+
 
 }

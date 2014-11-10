@@ -52,6 +52,9 @@ public class CombiFace extends HappyFace {
         if (sideFaceMap.containsKey(direction))
             throw new RuntimeException(String.format("a matching face already attached on [%s]", direction.toString()));
 
+        if (alreadyMatched(face))
+            throw new RuntimeException(String.format("face [%d] has already been matched"));
+
         if (FaceDirection.Parallel.equals(direction)) {
             checkEdgeParallel(face, direction);
             return;
@@ -418,6 +421,16 @@ public class CombiFace extends HappyFace {
             if ((parallelMatrix[i][elements-1] + rightSide[i])!=1)
                 throw new FaceNotMatchingException(String.format("parallel face not matching [%s] row, element [%d]", FaceDirection.Right, i));
         }
+
+    }
+
+    public boolean alreadyMatched(HappyFace face) {
+        for (Entry<FaceDirection, HappyFace> entry : sideFaceMap.entrySet()) {
+            if (sideFaceMap.get(entry.getKey()).equals(face))
+                return true;
+
+        }
+        return false;
     }
 
 }

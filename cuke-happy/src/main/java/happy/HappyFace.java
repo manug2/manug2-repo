@@ -96,6 +96,7 @@ public class HappyFace {
             if (row.length !=elements)
                 throw new AssertionError(String.format("incomplete data found, should have [%d] rows with only have '0' and '1' separated by space", elements));
             for (int i=0; i < elements; i++ ) {
+                int rowSum=0, colSum=0;
                 try {
                     int item = Integer.parseInt(row[i]);
                     if (item!=0 && item!=1)
@@ -108,6 +109,17 @@ public class HappyFace {
                     throw new AssertionError(String.format("incorrect data format found at row [%d], should only have '0' and '1'", j));
                 }
             }
+        }
+        for (int j=0; j < elements; j++) {
+            int rowSum = 0, colSum = 0;
+            for (int i=0; i < elements; i++ ) {
+                rowSum += matrix[j][i];
+                colSum += columns[j][i];
+            }
+            if(rowSum==0)
+                throw new AssertionError(String.format("all items in row [%d] are '0'", j));
+            else if(colSum==0)
+                throw new AssertionError(String.format("all items in column [%d] are '0'", j));
         }
     }
 
@@ -321,7 +333,9 @@ public class HappyFace {
         } else
             throw new FaceNotMatchingException(String.format("face [%d, %d] not matching when attached on side [%s], direction not known", id, rotation, direction));
 
-        if (sum>elements)
+        if (sum<1)
+            throw new FaceNotMatchingException(String.format("face [%d] not matching when attached on side [%s] because of no complimentary elements", id, direction));
+        else if (sum>elements)
             throw new FaceNotMatchingException(String.format("face [%d, %d] not matching when attached on side [%s] because of overlapping elements", id, rotation, direction));
 
     }
