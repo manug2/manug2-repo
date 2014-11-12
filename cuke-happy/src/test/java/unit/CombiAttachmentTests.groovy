@@ -170,154 +170,9 @@ class CombiAttachmentTests extends Specification {
         anchor.print()
     }
 
-    def "anchor can check edge when attaching top and left already attached"() {
-        def face = HappyFace.createFromString("0 1 0;1 0 0;1 1 1", 3)
-        face.load()
-        def anchor = new CombiFace(face)
-        def face1 = HappyFace.createFromString("0 0 1;1 0 0;0 1 0", 3)
-        face1.load()
-        def face2 = HappyFace.createFromString("0 1 0;1 0 1;0 0 1", 3)
-        face2.load()
-        expect :
-        anchor.match(face1, FaceDirection.Left)
-        anchor.print()
-        face2.print()
-        anchor.checkEdges(FaceDirection.Left, face2, FaceDirection.Top)
-    }
-
     def "can reverse an array"() {
         expect:
         [3, 2, 1, 0] == CombiFace.reverseArray([0, 1, 2, 3].toArray(new int[0]))
-    }
-
-    def "anchor check edge is OK when attaching top and bottom already attached"() {
-        def face = HappyFace.createFromString("0 1 0;1 0 1;0 1 0", 3)
-        face.load()
-        def anchor = new CombiFace(face)
-        def face1 = HappyFace.createFromString("1 0 1;1 1 0;1 0 1", 3)
-        face1.load()
-        def face2 = HappyFace.createFromString("0 1 0;1 0 1;0 0 1", 3)
-        face2.load()
-        expect :
-        anchor.match(face1, FaceDirection.Bottom)
-        anchor.print()
-        anchor.checkEdges(FaceDirection.Bottom, face2, FaceDirection.Top)
-    }
-
-    def "anchor check edge is OK when attaching top and right already attached"() {
-        def face = HappyFace.createFromString("0 1 0;1 0 0;1 0 1", 3)
-        face.load()
-        def anchor = new CombiFace(face)
-        def face1 = HappyFace.createFromString("0 1 0;1 0 1;0 1 0", 3)
-        face1.load()
-        def face2 = HappyFace.createFromString("1 1 0;0 1 0;0 0 1", 3)
-        face2.load()
-        face2.print()
-        expect :
-        anchor.match(face1, FaceDirection.Right)
-        anchor.print()
-        anchor.checkEdges(FaceDirection.Right, face2, FaceDirection.Top)
-    }
-
-    def "anchor gives error when attaching top and top already attached"() {
-        when:
-        def face = HappyFace.createFromString("0 1 0;1 0 0;1 0 1", 3)
-        face.load()
-        def anchor = new CombiFace(face)
-        def face1 = HappyFace.createFromString("0 1 0;0 1 1;1 0 1", 3)
-        face1.load()
-        def face2 = HappyFace.createFromString("0 1 0;0 0 1;0 0 1", 3)
-        face2.load()
-        anchor.match(face1, FaceDirection.Right)
-        anchor.checkEdges(FaceDirection.Top, face2, FaceDirection.Top)
-        then :
-        def e = thrown(RuntimeException)
-        e.getMessage() == "cannot check edges when same direction given for existing and new face"
-    }
-
-    def "anchor check edge is OK when attaching right and bottom already attached"() {
-        def face = HappyFace.createFromString("0 0 1;1 0 0;0 1 0", 3)
-        face.load()
-        def anchor = new CombiFace(face)
-        def face1 = HappyFace.createFromString("1 0 0;0 1 1;1 0 0", 3)
-        face1.load()
-        def face2 = HappyFace.createFromString("0 0 1;1 0 0;1 0 1", 3)
-        face2.load()
-        face2.print()
-        expect :
-        anchor.match(face1, FaceDirection.Bottom)
-        anchor.print()
-        anchor.checkEdges(FaceDirection.Bottom, face2, FaceDirection.Right)
-    }
-
-    def "anchor gives error when checking right and bottom already attached"() {
-        when:
-        def face = HappyFace.createFromString("0 0 1;1 0 0;0 1 0", 3)
-        face.load()
-        def anchor = new CombiFace(face)
-        def face1 = HappyFace.createFromString("1 0 0;0 1 1;1 0 0", 3)
-        face1.load()
-        def face2 = HappyFace.createFromString("0 0 1;1 0 0;0 0 1", 3)
-        face2.load()
-        anchor.match(face1, FaceDirection.Bottom)
-        anchor.print()
-        face2.print()
-        anchor.checkEdges(FaceDirection.Bottom, face2, FaceDirection.Right)
-        then:
-        def e = thrown(FaceNotMatchingException)
-        e.getMessage() == "face [Bottom] and [Right] not matching because of elements at anchor edge"
-    }
-
-    def "anchor gives error when checking left and bottom already attached at index 1"() {
-        when:
-        def face = HappyFace.createFromString("0 0 1;1 1 0;0 1 0", 3)
-        face.load()
-        def anchor = new CombiFace(face)
-        def face1 = HappyFace.createFromString("0 0 1;0 0 1;1 0 0", 3)
-        face1.load()
-        def face2 = HappyFace.createFromString("0 0 1;1 1 0;0 0 1", 3)
-        face2.load()
-        face2.print()
-        anchor.match(face1, FaceDirection.Bottom)
-        anchor.print()
-        anchor.checkEdges(FaceDirection.Bottom, face2, FaceDirection.Left)
-        then:
-        def e = thrown(FaceNotMatchingException)
-        e.getMessage() == "face [Bottom] and [Left] not matching because of element at edge with index [1]"
-    }
-
-    def "anchor gives error when checking left and bottom already attached at index 2"() {
-        when:
-        def face = HappyFace.createFromString("0 0 1;1 1 0;0 1 0", 3)
-        face.load()
-        def anchor = new CombiFace(face)
-        def face1 = HappyFace.createFromString("0 0 1;0 1 1;1 0 0", 3)
-        face1.load()
-        def face2 = HappyFace.createFromString("0 0 1;1 0 0;1 1 1", 3)
-        face2.load()
-        face2.print()
-        anchor.match(face1, FaceDirection.Bottom)
-        anchor.print()
-        anchor.checkEdges(FaceDirection.Bottom, face2, FaceDirection.Left)
-        then:
-        def e = thrown(FaceNotMatchingException)
-        e.getMessage() == "face [Bottom] and [Left] not matching because of element at parallel edge is present in both"
-
-    }
-
-    def "anchor check edge is OK when attaching left and bottom already attached"() {
-        def face = HappyFace.createFromString("0 0 1;1 1 0;0 1 0", 3)
-        face.load()
-        def anchor = new CombiFace(face)
-        def face1 = HappyFace.createFromString("0 0 1;0 1 1;1 0 0", 3)
-        face1.load()
-        def face2 = HappyFace.createFromString("0 0 1;1 0 0;0 1 1", 3)
-        face2.load()
-        expect :
-        anchor.match(face1, FaceDirection.Bottom)
-        anchor.print()
-        face2.print()
-        anchor.checkEdges(FaceDirection.Bottom, face2, FaceDirection.Left)
     }
 
     def "parallel face cannot be placed at [Left, Top] corner"() {
@@ -329,11 +184,11 @@ class CombiAttachmentTests extends Specification {
         face1.load()
         def face2 = HappyFace.createFromString("0 1 0;1 0 1;0 0 1", 3)
         face2.load()
-        def face3 = HappyFace.createFromString("0 0 1;1 0 0;0 0 1", 3)
+        def face3 = HappyFace.createFromString("0 0 1;1 1 0;0 0 1", 3)
         face3.load()
-        def face4 = HappyFace.createFromString("0 1 0;0 0 1;1 0 0", 3)
+        def face4 = HappyFace.createFromString("0 1 0;0 1 1;1 0 0", 3)
         face4.load()
-        def face5 = HappyFace.createFromString("0 0 0;0 1 1;0 1 0", 3)
+        def face5 = HappyFace.createFromString("0 1 0;0 1 1;1 1 0", 3)
         face5.load()
         face5.print()
 
@@ -357,7 +212,7 @@ class CombiAttachmentTests extends Specification {
         face1.load()
         def face2 = HappyFace.createFromString("0 1 0;1 0 1;0 0 1", 3)
         face2.load()
-        def face3 = HappyFace.createFromString("0 0 1;1 0 0;0 0 1", 3)
+        def face3 = HappyFace.createFromString("0 0 1;1 1 0;0 0 1", 3)
         face3.load()
         def face4 = HappyFace.createFromString("0 1 0;0 0 1;1 0 0", 3)
         face4.load()
@@ -385,7 +240,7 @@ class CombiAttachmentTests extends Specification {
         face1.load()
         def face2 = HappyFace.createFromString("0 1 0;1 0 1;0 0 1", 3)
         face2.load()
-        def face3 = HappyFace.createFromString("0 0 1;1 0 0;0 0 1", 3)
+        def face3 = HappyFace.createFromString("0 0 1;1 1 0;0 0 1", 3)
         face3.load()
         def face4 = HappyFace.createFromString("0 1 0;0 0 1;1 0 0", 3)
         face4.load()
@@ -413,7 +268,7 @@ class CombiAttachmentTests extends Specification {
         face1.load()
         def face2 = HappyFace.createFromString("0 1 0;1 0 1;0 0 1", 3)
         face2.load()
-        def face3 = HappyFace.createFromString("0 0 1;1 0 0;0 0 1", 3)
+        def face3 = HappyFace.createFromString("0 0 1;1 1 0;0 0 1", 3)
         face3.load()
         def face4 = HappyFace.createFromString("0 1 0;0 0 1;1 0 0", 3)
         face4.load()

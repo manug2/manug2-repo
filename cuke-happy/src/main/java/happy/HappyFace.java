@@ -20,6 +20,12 @@ public class HappyFace {
             throw new AssertionError("'data' to load face is either null or blank");
         return new HappyFace(null, data, elementsCount);
     }
+
+    public static HappyFace createFromString(int elementsCount, String data) {
+        if (data==null || "".equals(data.trim()))
+            throw new AssertionError("'data' to load face is either null or blank");
+        return new HappyFace(null, data, elementsCount);
+    }
     private HappyFace(String filePath, String dataString, int elementsCount) {
         if (elementsCount < 1)
             throw new AssertionError("'elementsCount' cannot be less than 1");
@@ -33,14 +39,14 @@ public class HappyFace {
         rotation = 0;
     }
 
-    protected HappyFace(int elements, int id, int[][] matrix) {
+    protected HappyFace(int elements, int id, int[][] matrix, int rotation) {
         path = null;
         data = null;
         this.elements = elements;
         this.id = id;
         this.matrix = matrix;
         this.loaded = true;
-        this.rotation = -1;
+        this.rotation = rotation;
         this.columns = new int[elements][elements];
         for (int i=0; i < elements; i++)
             for (int j=0; j< elements; j++)
@@ -92,7 +98,7 @@ public class HappyFace {
         matrix = new int[elements][elements];
         columns = new int[elements][elements];
         for (int j=0; j < elements; j++) {
-            String[] row = validLines[j].split(" ");
+            String[] row = validLines[j].trim().split(" ");
             if (row.length !=elements)
                 throw new AssertionError(String.format("incomplete data found, should have [%d] rows with only have '0' and '1' separated by space", elements));
             for (int i=0; i < elements; i++ ) {
@@ -117,9 +123,9 @@ public class HappyFace {
                 colSum += columns[j][i];
             }
             if(rowSum==0)
-                throw new AssertionError(String.format("all items in row [%d] are '0'", j));
+                throw new AssertionError(String.format("face [%d, %d] has all items in row [%d] as '0'", id, rotation, j));
             else if(colSum==0)
-                throw new AssertionError(String.format("all items in column [%d] are '0'", j));
+                throw new AssertionError(String.format("face [%d, %d] has all items in column [%d] as '0'", id, rotation, j));
         }
     }
 
@@ -129,7 +135,7 @@ public class HappyFace {
         if (!loaded) {
             builder.append('[').append(id).append(',').append(this).append("]");
         } else {
-            builder.append('[').append(id).append(',').append(System.identityHashCode(this)).append("]");
+            builder.append('[').append(id).append(',').append(rotation).append(',').append(System.identityHashCode(this)).append("]");
             for (int i=0; i < elements; i++) {
                 builder.append("\n");
                 for (int j=0; j < elements; j++)
@@ -176,7 +182,7 @@ public class HappyFace {
     private static int generateId() {
         int id;
         synchronized (HappyFace.class) {
-            id = ++_identifier;
+            id = _identifier++;
         }
         return id;
     }
@@ -211,32 +217,19 @@ public class HappyFace {
                 m[i][j] = matrix[elements-1-j][i];
             }
         }
-        return new HappyFace(elements, id, m);
-    }
-
-    public HappyFace rotateCC() {
-        //simple rotation counter-clock-wise
-        int[][] m = new int[elements][elements];
-
-        for (int i=0; i < elements; i++) {
-            for (int j=0; j < elements; j++) {
-                m[i][j] = matrix[j][elements-1-i];
-            }
-        }
-        return new HappyFace(elements, id, m);
+        return new HappyFace(elements, id, m, rotation+1);
     }
 
     public HappyFace flip() {
-        //following implementation maybe wrong
-        //ideally row 1 should become last row and second becomes second last..
         int[][] m = new int[elements][elements];
 
         for (int i=0; i < elements; i++) {
             for (int j=0; j < elements; j++) {
-                m[i][j] = 1 - matrix[i][j];
+                m[i][j] = matrix[i][elements-1-j];
             }
         }
-        return new HappyFace(elements, id, m);
+
+        return new HappyFace(elements, id, m, rotation + 1);
     }
 
     public int getRotation() {
@@ -257,8 +250,10 @@ public class HappyFace {
             //Un-flip the last flip and then rotate
             newFace = flip();
             newFace = newFace.rotateCW();
+            newFace.rotation = newFace.rotation - 1;
+            //Counter incremented once each in flipping and rotateCW, hence need to reduce
         }
-        newFace.rotation = rotation + 1;
+        //May optimise if two or more rotations lead to same matrix
         return newFace;
     }
 
@@ -290,70 +285,35 @@ public class HappyFace {
         if (direction == FaceDirection.Left) {
             side1 = getColumns(0);
             side2 = other.getColumns(elements-1);
-            for (int i=0; i < elements; i++) {
-                int ts = side1[i] + side2[i];
-                if (ts <= 1)
-                    sum += ts;
-                else
-                    throw new FaceNotMatchingException(String.format("face [%d, %d] not matching when attached on side [%s] because of element [%d]", id, rotation, direction, i));
-            }
         }
         else if (direction == FaceDirection.Bottom) {
             side1 = getRows(elements-1);
             side2 = other.getRows(0);
-            for (int i=0; i < elements; i++) {
-                int ts = side1[i] + side2[i];
-                if (ts <= 1)
-                    sum += ts;
-                else
-                    throw new FaceNotMatchingException(String.format("face [%d, %d] not matching when attached on side [%s] because of element [%d]", id, rotation, direction, i));
-            }
         }
         else if (direction == FaceDirection.Right) {
             side1 = getColumns(elements-1);
             side2 = other.getColumns(0);
-            for (int i=0; i < elements; i++) {
-                int ts = side1[i] + side2[i];
-                if (ts <= 1)
-                    sum += ts;
-                else
-                    throw new FaceNotMatchingException(String.format("face [%d, %d] not matching when attached on side [%s] because of element [%d]", id, rotation, direction, i));
-            }
         }
         else if (direction == FaceDirection.Top) {
             side1 = getRows(0);
             side2 = other.getRows(elements-1);
-            for (int i=0; i < elements; i++) {
-                int ts = side1[i] + side2[i];
-                if (ts <= 1)
-                    sum += ts;
-                else
-                    throw new FaceNotMatchingException(String.format("face [%d, %d] not matching when attached on side [%s] because of element [%d]", id, rotation, direction, i));
-            }
         } else
-            throw new FaceNotMatchingException(String.format("face [%d, %d] not matching when attached on side [%s], direction not known", id, rotation, direction));
+            throw new FaceNotMatchingException(String.format("face [%d, %d] not matching when attached on side [%s], direction not known", other.id, other.rotation, direction));
 
-        if (sum<1)
-            throw new FaceNotMatchingException(String.format("face [%d] not matching when attached on side [%s] because of no complimentary elements", id, direction));
-        else if (sum>elements)
-            throw new FaceNotMatchingException(String.format("face [%d, %d] not matching when attached on side [%s] because of overlapping elements", id, rotation, direction));
+        if(side1[0] + side2[0] > 1)
+            throw new FaceNotMatchingException(String.format("face [%d, %d] not matching when attached on side [%s] because of edge element [%d]", other.id, other.rotation, direction, 0));
+        if(side1[elements-1] + side2[elements-1] > 1)
+            throw new FaceNotMatchingException(String.format("face [%d, %d] not matching when attached on side [%s] because of edge element [%d]", other.id, other.rotation, direction, elements-1));
 
+        for (int i=1; i < elements-1; i++) {
+            int ts = side1[i] + side2[i];
+            if (ts != 1)
+                throw new FaceNotMatchingException(String.format("face [%d, %d] not matching when attached on side [%s] because of element [%d]", other.id, other.rotation, direction, i));
+        }
     }
 
     public HappyFace clone() {
-        return new HappyFace(elements, id, matrix);
-    }
-
-    public HappyFace verticalFlip() {
-        int[][] m = new int[elements][elements];
-
-        for (int i=0; i < elements; i++) {
-            for (int j=0; j < elements; j++) {
-                m[i][j] = matrix[i][elements-1-j];
-            }
-        }
-
-        return new HappyFace(elements, id, m);
+        return new HappyFace(elements, id, matrix, rotation);
     }
 
     public static int[] reverseArray(int[] input) {

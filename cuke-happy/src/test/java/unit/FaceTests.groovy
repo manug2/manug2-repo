@@ -279,7 +279,7 @@ class FaceTests extends Specification {
         face.load()
         then:
         def e = thrown(AssertionError)
-        e.getMessage() == "all items in row [0] are '0'"
+        e.getMessage().endsWith(" has all items in row [0] as '0'")
     }
 
     def "face cannot have right side with all '0'" () {
@@ -288,7 +288,7 @@ class FaceTests extends Specification {
         face.load()
         then:
         def e = thrown(AssertionError)
-        e.getMessage() == "all items in column [2] are '0'"
+        e.getMessage().endsWith(" has all items in column [2] as '0'")
     }
 
 

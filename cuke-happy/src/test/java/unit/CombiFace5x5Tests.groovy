@@ -32,152 +32,49 @@ class CombiFace5x5Tests extends Specification {
 
     def "anchor does not match and attach an un-suitable face"() {
         when:
-        def face = HappyFace.createFromFile("src/test/resources/testFiles/face0.txt", 5)
+        def face = HappyFace.createFromString(5,
+                        "0 1 1 1 0;" +
+                        "1 0 0 0 1;" +
+                        "1 0 1 0 0;" +
+                        "0 0 0 1 0;" +
+                        "1 0 0 0 0")
         face.load()
         def anchor = new CombiFace(face)
-        def face1 = HappyFace.createFromFile("src/test/resources/testFiles/face1.txt", 5)
+        def face1 = HappyFace.createFromString(5,
+                        "0 1 1 1 1;" +
+                        "1 0 0 0 0;" +
+                        "0 1 0 0 0;" +
+                        "1 0 0 0 0;" +
+                        "0 0 1 0 0")
+        face1.load()
+        face1.print()
+        anchor.print()
+        anchor.match(face1, FaceDirection.Left)
+        anchor.print()
+        then:thrown(FaceNotMatchingException)
+    }
+
+    def "anchor matches and attaches an un-suitable face"() {
+        when:
+        def face = HappyFace.createFromString(5,
+                "0 1 1 1 0;" +
+                "1 0 0 0 1;" +
+                "1 0 0 0 1;" +
+                "0 1 0 0 0;" +
+                "1 0 0 0 1")
+        face.load()
+        def anchor = new CombiFace(face)
+        def face1 = HappyFace.createFromString(5,
+                "1 1 1 1 0;" +
+                "0 0 0 1 0;" +
+                "0 1 0 0 1;" +
+                "1 0 0 0 0;" +
+                "0 0 1 0 0")
         face1.load()
         face1.print()
         anchor.print()
         anchor.match(face1, FaceDirection.Left)
         then:thrown(FaceNotMatchingException)
-    }
-
-    def "anchor matches a suitable face on left"() {
-        def face = HappyFace.createFromFile("src/test/resources/testFiles/face0.txt", 5)
-        face.load()
-        def anchor = new CombiFace(face)
-        def face1 = HappyFace.createFromFile("src/test/resources/testFiles/face1.txt", 5)
-        face1.load()
-        expect:
-        anchor.match(face1, FaceDirection.Left)
-    }
-
-    def "anchor matches a suitable face at bottom"() {
-        def face = HappyFace.createFromFile("src/test/resources/testFiles/face0.txt", 5)
-        face.load()
-        def anchor = new CombiFace(face)
-        def face1 = HappyFace.createFromFile("src/test/resources/testFiles/face1.txt", 5)
-        face1.load()
-        expect:
-        anchor.match(face1, FaceDirection.Bottom)
-    }
-
-    def "anchor matches a suitable face on right"() {
-        def face = HappyFace.createFromFile("src/test/resources/testFiles/face0.txt", 5)
-        face.load()
-        def anchor = new CombiFace(face)
-        def face1 = HappyFace.createFromFile("src/test/resources/testFiles/face1.txt", 5)
-        face1.load()
-        expect:
-        anchor.match(face1, FaceDirection.Right)
-    }
-
-    def "anchor matches a suitable face on top"() {
-        def face = HappyFace.createFromFile("src/test/resources/testFiles/face0.txt", 5)
-        face.load()
-        def anchor = new CombiFace(face)
-        def face1 = HappyFace.createFromFile("src/test/resources/testFiles/face1.txt", 5)
-        face1.load()
-        expect:
-        anchor.match(face1, FaceDirection.Top)
-    }
-
-    def "anchor attaches a matching face on left"() {
-        def face = HappyFace.createFromFile("src/test/resources/testFiles/face0.txt", 5)
-        face.load()
-        def anchor = new CombiFace(face)
-        def face1 = HappyFace.createFromFile("src/test/resources/testFiles/face1.txt", 5)
-       face1.load()
-        anchor.match(face1, FaceDirection.Left)
-        expect: [0, 1, 1] == anchor.getColumns(0)
-    }
-
-    def "anchor attaches a matching face at bottom"() {
-        def face = HappyFace.createFromFile("src/test/resources/testFiles/face0.txt", 5)
-        face.load()
-        def anchor = new CombiFace(face)
-        def face1 = HappyFace.createFromFile("src/test/resources/testFiles/face1.txt", 5)
-        face1.load()
-        anchor.match(face1, FaceDirection.Bottom)
-        expect: [1, 1, 1] == anchor.getRows(2)
-    }
-
-    def "anchor attaches a matching face on right"() {
-        def face = HappyFace.createFromFile("src/test/resources/testFiles/face0.txt", 5)
-        face.load()
-        def anchor = new CombiFace(face)
-        def face1 = HappyFace.createFromFile("src/test/resources/testFiles/face1.txt", 5)
-        face1.load()
-        anchor.match(face1, FaceDirection.Right)
-        expect: [0, 1, 0] == anchor.getColumns(2)
-    }
-
-    def "anchor attaches a matching face on top"() {
-        def face = HappyFace.createFromFile("src/test/resources/testFiles/face0.txt", 5)
-        face.load()
-        def anchor = new CombiFace(face)
-        def face1 = HappyFace.createFromFile("src/test/resources/testFiles/face1.txt", 5)
-        face1.load()
-        anchor.match(face1, FaceDirection.Top)
-        expect: [0, 1, 1] == anchor.getRows(0)
-    }
-
-    def "anchor can print"() {
-        def face = HappyFace.createFromString("0 1 0;1 0 0;1 1 1", 3)
-        face.load()
-        def anchor = new CombiFace(face)
-        anchor.print();
-        expect : true
-    }
-
-    def "anchor cannot be initialized from un-loaded face"() {
-        when:
-        def face = HappyFace.createFromString("0 1 0;1 0 1;1 1 1", 3)
-        new CombiFace(face)
-        then:
-        def e = thrown(RuntimeException)
-        e.getMessage() == "face data is not loaded. did you call load()?"
-    }
-    def "anchor can print when left attached face"() {
-        def face = HappyFace.createFromString("0 1 0;1 0 0;1 1 1", 3)
-        face.load()
-        def anchor = new CombiFace(face)
-        def face1 = HappyFace.createFromString("0 1 1;1 0 0;0 1 0", 3)
-        face1.load()
-        expect :
-        anchor.match(face1, FaceDirection.Left)
-    }
-
-    def "anchor can print when bottom attached face"() {
-        def face = HappyFace.createFromString("0 1 1;1 0 0;1 1 0", 3)
-        face.load()
-        def anchor = new CombiFace(face)
-        def face1 = HappyFace.createFromString("0 0 1;1 0 1;1 1 1", 3)
-        face1.load()
-        expect :
-        anchor.match(face1, FaceDirection.Bottom)
-    }
-    def "anchor can print when right attached face"() {
-        def face = HappyFace.createFromFile("src/test/resources/testFiles/face0.txt", 5)
-        face.load()
-        def anchor = new CombiFace(face)
-        def face1 = HappyFace.createFromFile("src/test/resources/testFiles/face1.txt", 5)
-        face1.load()
-        face1.load()
-        expect :
-        anchor.match(face1, FaceDirection.Right)
-
-    }
-
-    def "anchor can print when top attached face"() {
-        def face = HappyFace.createFromString("0 0 1;1 0 1;1 1 1", 3)
-        face.load()
-        def anchor = new CombiFace(face)
-        def face1 = HappyFace.createFromString("0 1 1;1 0 0;1 1 0", 3)
-        face1.load()
-        expect :
-        anchor.match(face1, FaceDirection.Top)
     }
 
 }

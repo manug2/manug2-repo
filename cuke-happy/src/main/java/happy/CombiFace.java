@@ -6,7 +6,7 @@ import java.util.Map.Entry;
 
 public class CombiFace extends HappyFace {
     public CombiFace(HappyFace anchor) {
-        super(anchor.elementCount(), anchor.identifier(), anchor.getMatrix());//, anchor.getRotation());
+        super(anchor.elementCount(), anchor.identifier(), anchor.getMatrix(), anchor.getRotation());
 
         sideFaceMap = new HashMap<FaceDirection, HappyFace>(5);
         effectiveMatrix = new int[anchor.elementCount()][anchor.elementCount()];
@@ -47,16 +47,17 @@ public class CombiFace extends HappyFace {
     @Override
     public void match(final HappyFace face, final FaceDirection direction) {
         if (equals(face) || face==null)
-            throw new RuntimeException("other face is null, cannot attempt matching");
+            throw new FaceNotMatchingException("other face is null, cannot attempt matching");
 
         if (sideFaceMap.containsKey(direction))
-            throw new RuntimeException(String.format("a matching face already attached on [%s]", direction.toString()));
+            throw new FaceNotMatchingException(String.format("a matching face already attached on [%s]", direction));
 
         if (alreadyMatched(face))
-            throw new RuntimeException(String.format("face [%d] has already been matched"));
+            throw new FaceNotMatchingException(String.format("face [%d, %d] has already been matched previously", face.identifier(), face.getRotation()));
 
         if (FaceDirection.Parallel.equals(direction)) {
             checkEdgeParallel(face, direction);
+            sideFaceMap.put(direction, face);
             return;
         }
 
@@ -85,22 +86,24 @@ public class CombiFace extends HappyFace {
 
         //Also attaches the matched face to the anchor, which is this object
         sideFaceMap.put(direction, face);
+
+        int[][] faceMat = face.getMatrix();
         switch(direction) {
             case Left  :
-                effectiveMatrix[0][0] = 1;//change to sum of two incoming sides
-                effectiveMatrix[elements-1][0] = 1;
+                effectiveMatrix[0][0] += faceMat[0][elements-1];//change to sum of two incoming sides
+                effectiveMatrix[elements-1][0] += faceMat[elements-1][elements-1];
                 break;
             case Bottom:
-                effectiveMatrix[elements-1][0] = 1;
-                effectiveMatrix[elements-1][elements-1] = 1;
+                effectiveMatrix[elements-1][0] += faceMat[0][0];
+                effectiveMatrix[elements-1][elements-1] += faceMat[0][elements-1];
                 break;
             case Right  :
-                effectiveMatrix[0][elements-1] = 1;
-                effectiveMatrix[elements-1][elements-1] = 1;
+                effectiveMatrix[0][elements-1] += faceMat[0][0];
+                effectiveMatrix[elements-1][elements-1] += faceMat[elements-1][0];
                 break;
             case Top:
-                effectiveMatrix[0][0] = 1;
-                effectiveMatrix[0][elements-1] = 1;
+                effectiveMatrix[0][0] += faceMat[elements-1][0];
+                effectiveMatrix[0][elements-1] += faceMat[elements-1][elements-1];
                 break;
             case Parallel:
                 //effective matrix does not change as it does not touch anchor
@@ -152,12 +155,13 @@ public class CombiFace extends HappyFace {
     public void print() {
 
         StringBuilder builder = new StringBuilder(this.getClass().getCanonicalName());
-        builder.append('[').append(identifier()).append(',').append(System.identityHashCode(this)).append("]");
+        builder.append('[').append(identifier()).append(',').append(getRotation()).append(',').append(System.identityHashCode(this)).append("]");
 
         //PRINT Top matrix
         final HappyFace top = getTop();
         final HappyFace left = getLeft();
-        if (top!=null) {
+        final HappyFace parallel = getParallel();
+        if (parallel==null && top!=null) {
             int[][] matrix = top.getMatrix();
             for (int i=0; i < elements; i++) {
                 builder.append("\n");
@@ -196,7 +200,7 @@ public class CombiFace extends HappyFace {
             int[][] matrix = bottom.getMatrix();
             for (int i=0; i < elements; i++) {
                 builder.append("\n");
-                if (top!=null)
+                if (left!=null)
                     for (int k=0; k < elements; k++)
                         builder.append("  ");
                 for (int j=0; j < elements; j++)
@@ -205,9 +209,12 @@ public class CombiFace extends HappyFace {
         }
 
         //PRINT Bottom matrices
-        final HappyFace parallel = getParallel();
         if (parallel!=null) {
-            final HappyFace fp = parallel.flip();
+            builder.append("\n");
+            for (int k=0; k < elements; k++)
+                builder.append("  ");
+            for (int k=0; k < elements; k++)
+                builder.append("^ ");
             int[][] matrix = parallel.getMatrix();
             for (int i=0; i < elements; i++) {
                 builder.append("\n");
@@ -215,6 +222,24 @@ public class CombiFace extends HappyFace {
                     builder.append("  ");
                 for (int j=0; j < elements; j++)
                     builder.append(matrix[i][j]).append(' ');
+            }
+            if (top!=null) {
+                //Print inverted top
+                builder.append("\n");
+                for (int k=0; k < elements; k++)
+                    builder.append("  ");
+                for (int k=0; k < elements; k++)
+                    builder.append("v ");
+                int[][] t_matrix = top.getMatrix();
+                for (int i=0; i < elements; i++) {
+                    builder.append("\n");
+                    if(left!=null)
+                        for (int k=0; k < elements; k++)
+                            builder.append("  ");
+                    for (int j=0; j < elements; j++)
+                        builder.append(t_matrix[elements-1-i][j]).append(' ');
+                }
+
             }
         }
 
@@ -238,19 +263,6 @@ public class CombiFace extends HappyFace {
         return cloned;
     }
 
-    public void checkEdges(FaceDirection existingFace, HappyFace face, FaceDirection direction) {
-        if(existingFace.equals(direction))
-            throw new RuntimeException("cannot check edges when same direction given for existing and new face");
-        if (FaceDirection.Left.equals(existingFace))
-            checkEdgeLeft(face, direction);
-        else if (FaceDirection.Bottom.equals(existingFace))
-            checkEdgeBottom(face, direction);
-        else if (FaceDirection.Right.equals(existingFace))
-            checkEdgeRight(face, direction);
-        else if (FaceDirection.Top.equals(existingFace))
-            checkEdgeTop(face, direction);
-    }
-
     public void checkEdgeLeft(HappyFace face, FaceDirection direction) {
         final HappyFace existing = getLeft();
         if (existing==null)
@@ -267,7 +279,7 @@ public class CombiFace extends HappyFace {
         } else if (FaceDirection.Bottom.equals(direction)) {
             side1 = existing.getRows(elements - 1);
             side2 = face.getColumns(0);
-            anchorEdgeElement = effectiveMatrix[0][0] + side2[0];
+            anchorEdgeElement = effectiveMatrix[elements-1][0] + side2[0];
             parallelEdgeElement = side1[0] + side2[elements - 1];
             side2 = reverseArray(side2); //For comparing elements inside the edges
         } else
@@ -378,11 +390,10 @@ public class CombiFace extends HappyFace {
     }
 
     public void checkEdgeParallel(HappyFace face, FaceDirection direction) {
-        if(sideFaceMap.size()<4)
-            throw new RuntimeException(String.format("a matching face can be attached on [%s] only after all other sides are full", FaceDirection.Parallel.toString()));
-
         if ( ! FaceDirection.Parallel.equals(direction))
-            throw new RuntimeException(String.format("checkEdgeParallel() called for wrong direction [%s]", direction));
+            throw new FaceNotMatchingException(String.format("checkEdgeParallel() called for wrong direction [%s]", direction));
+        if(sideFaceMap.size()<4)
+            throw new FaceNotMatchingException(String.format("a matching face can be attached on [%s] only after all other sides are full", FaceDirection.Parallel));
 
         final int[][] parallelMatrix = face.getMatrix() ;
 
@@ -425,12 +436,36 @@ public class CombiFace extends HappyFace {
     }
 
     public boolean alreadyMatched(HappyFace face) {
+        return sideFaceMap.containsValue(face);
+        /*
         for (Entry<FaceDirection, HappyFace> entry : sideFaceMap.entrySet()) {
             if (sideFaceMap.get(entry.getKey()).equals(face))
                 return true;
 
         }
         return false;
+        */
+    }
+
+    public boolean hasFace(FaceDirection direction) {
+        return sideFaceMap.containsKey(direction);
+    }
+
+    public boolean isSolved() {
+        return 5 == sideFaceMap.size();
+    }
+
+    public String getMatchedSequence(String prefix) {
+        StringBuilder builder = new StringBuilder();
+        if(prefix!=null)
+            builder.append(prefix).append(" : ");
+
+        builder.append('[').append(identifier()).append(", ").append(getRotation()).append(']');
+        for (Entry<FaceDirection, HappyFace> entry : sideFaceMap.entrySet()) {
+            final HappyFace face = entry.getValue();
+            builder.append(" - [").append(face.identifier()).append(", ").append(face.getRotation()).append(" (").append(entry.getKey()).append(")]");
+        }
+        return builder.toString();
     }
 
 }
