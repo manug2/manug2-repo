@@ -1,6 +1,7 @@
 package happy;
 
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.nio.file.Paths;
@@ -37,9 +38,18 @@ public class HappyFace {
         matrix = null;
         columns = null;
         rotation = 0;
+        previousMatrices = new ArrayList<int[][]>(8);
+        if(path==null)
+            name = "" + id;
+        else {
+            final String[] parts = this.path.split("/");
+            final String fileName = parts[parts.length-1];
+            final String[] nameParts = fileName.split("\\.");
+            name =  nameParts[0];
+        }
     }
 
-    protected HappyFace(int elements, int id, int[][] matrix, int rotation) {
+    protected HappyFace(int elements, int id, int[][] matrix, int rotation, List<int[][]> previousMatrices, String name) {
         path = null;
         data = null;
         this.elements = elements;
@@ -51,6 +61,11 @@ public class HappyFace {
         for (int i=0; i < elements; i++)
             for (int j=0; j< elements; j++)
                 this.columns[i][j] = matrix[j][i];
+        this.previousMatrices = new ArrayList<int[][]>(8);
+        if(previousMatrices!=null)
+            this.previousMatrices.addAll(previousMatrices);
+        this.previousMatrices.add(this.matrix);
+        this.name = name;
     }
 
     private boolean loaded = false;
@@ -61,6 +76,9 @@ public class HappyFace {
     private final int id;
     private int[][] columns;
     private int rotation;
+    protected final String name;
+
+    protected final List<int[][]> previousMatrices;
 
     public boolean isLoaded() {
         return loaded;
@@ -75,7 +93,7 @@ public class HappyFace {
 
     public void load() throws IOException {
         if(loaded)
-            throw new AssertionError(String.format("attempt to load already loaded face [%d]", id));
+            throw new AssertionError(String.format("attempt to load already loaded face [%s]", name));
         String[] lines;
         if (path!=null) {
             List<String> list = Files.readAllLines(Paths.get(path), StandardCharsets.UTF_8);
@@ -88,7 +106,7 @@ public class HappyFace {
         else
             throw new AssertionError(String.format("no data or file provided to load data"));
         if (lines.length != elements)
-            throw new AssertionError(String.format("incomplete data found, should have [%d] rows", elements));
+            throw new AssertionError(String.format("incomplete data found, while loading face [%s]; should have [%d] rows", name, elements));
 
         loadInternal(lines);
         loaded = true;
@@ -123,19 +141,20 @@ public class HappyFace {
                 colSum += columns[j][i];
             }
             if(rowSum==0)
-                throw new AssertionError(String.format("face [%d, %d] has all items in row [%d] as '0'", id, rotation, j));
+                throw new AssertionError(String.format("face [%s, %d] has all items in row [%d] as '0'", name, rotation, j));
             else if(colSum==0)
-                throw new AssertionError(String.format("face [%d, %d] has all items in column [%d] as '0'", id, rotation, j));
+                throw new AssertionError(String.format("face [%s, %d] has all items in column [%d] as '0'", name, rotation, j));
         }
+        this.previousMatrices.add(this.matrix);
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder(this.getClass().getCanonicalName());
         if (!loaded) {
-            builder.append('[').append(id).append(',').append(this).append("]");
+            builder.append('[').append(name).append(',').append(this).append("]");
         } else {
-            builder.append('[').append(id).append(',').append(rotation).append(',').append(System.identityHashCode(this)).append("]");
+            builder.append('[').append(name).append(',').append(rotation).append(',').append(System.identityHashCode(this)).append("]");
             for (int i=0; i < elements; i++) {
                 builder.append("\n");
                 for (int j=0; j < elements; j++)
@@ -217,7 +236,8 @@ public class HappyFace {
                 m[i][j] = matrix[elements-1-j][i];
             }
         }
-        return new HappyFace(elements, id, m, rotation+1);
+
+        return new HappyFace(elements, id, m, rotation+1, previousMatrices, name);
     }
 
     public HappyFace flip() {
@@ -229,7 +249,7 @@ public class HappyFace {
             }
         }
 
-        return new HappyFace(elements, id, m, rotation + 1);
+        return new HappyFace(elements, id, m, rotation + 1, previousMatrices, name);
     }
 
     public int getRotation() {
@@ -237,7 +257,17 @@ public class HappyFace {
     }
 
     public HappyFace rotate() {
-        //May optimise if two or more rotations lead to same matrix
+         HappyFace newFace = rotateSimple();
+         for (int[][] previous : previousMatrices ) {
+            if (Arrays.deepEquals(newFace.matrix, previous)) {
+                newFace = newFace.rotate();
+                break;
+            }
+        }
+        previousMatrices.add(newFace.matrix);
+        return newFace;
+    }
+    public HappyFace rotateSimple() {
         if (rotation<0)
             throw new InvalidRotationException(String.format("Invalid state of face, rotation index should have been >= 0 but was [%d]", rotation));
         else if (rotation>=7)
@@ -253,10 +283,8 @@ public class HappyFace {
             newFace.rotation = newFace.rotation - 1;
             //Counter incremented once each in flipping and rotateCW, hence need to reduce
         }
-        //May optimise if two or more rotations lead to same matrix
         return newFace;
     }
-
     /* auto-rotate sequence
 
                                                   O (Original)
@@ -298,22 +326,22 @@ public class HappyFace {
             side1 = getRows(0);
             side2 = other.getRows(elements-1);
         } else
-            throw new FaceNotMatchingException(String.format("face [%d, %d] not matching when attached on side [%s], direction not known", other.id, other.rotation, direction));
+            throw new FaceNotMatchingException(String.format("face [%s, %d] not matching when attached on side [%s], direction not known", other.name, other.rotation, direction));
 
         if(side1[0] + side2[0] > 1)
-            throw new FaceNotMatchingException(String.format("face [%d, %d] not matching when attached on side [%s] because of edge element [%d]", other.id, other.rotation, direction, 0));
+            throw new FaceNotMatchingException(String.format("face [%s, %d] not matching when attached on side [%s] because of edge element [%d]", other.name, other.rotation, direction, 0));
         if(side1[elements-1] + side2[elements-1] > 1)
-            throw new FaceNotMatchingException(String.format("face [%d, %d] not matching when attached on side [%s] because of edge element [%d]", other.id, other.rotation, direction, elements-1));
+            throw new FaceNotMatchingException(String.format("face [%s, %d] not matching when attached on side [%s] because of edge element [%d]", other.name, other.rotation, direction, elements-1));
 
         for (int i=1; i < elements-1; i++) {
             int ts = side1[i] + side2[i];
             if (ts != 1)
-                throw new FaceNotMatchingException(String.format("face [%d, %d] not matching when attached on side [%s] because of element [%d]", other.id, other.rotation, direction, i));
+                throw new FaceNotMatchingException(String.format("face [%s, %d] not matching when attached on side [%s] because of element [%d]", other.name, other.rotation, direction, i));
         }
     }
 
     public HappyFace clone() {
-        return new HappyFace(elements, id, matrix, rotation);
+        return new HappyFace(elements, id, matrix, rotation, previousMatrices, name);
     }
 
     public static int[] reverseArray(int[] input) {
@@ -325,4 +353,7 @@ public class HappyFace {
         return output;
     }
 
+    public String name() {
+        return name;
+    }
 }

@@ -59,12 +59,12 @@ public class CubeSolver {
             return null;
     }
 
-    public HappyFace matchOne(final CombiFace anchor, final HappyFace origFace, final FaceDirection direction, final int opId) {
+    public static HappyFace matchOne(final CombiFace anchor, final HappyFace origFace, final FaceDirection direction, final int opId) {
         HappyFace face = origFace.clone();
         while (true) {
             try {
                 anchor.match(face, direction);
-                //System.out.println(String.format("[%d] matched face [%d, %d] to anchor in direction [%s]:",opId, face.identifier(), face.getRotation(), direction));
+                //System.out.println(String.format("[%d] matched face [%d, %d] to anchor in direction [%s]:",opId, face.name(), face.getRotation(), direction));
                 return face;
             } catch (FaceNotMatchingException fe) {
                 try {
@@ -86,76 +86,91 @@ public class CubeSolver {
 
 
         List<HappyFace> uniqueSolutions = new ArrayList<HappyFace>(5);
-        /*
-        CombiFace anchor = new CombiFace(faces.get(0).clone());
-        List<CombiFace> solutions = solveForAnchor(0, anchor, faces);
-        if (solutions!=null && solutions.size()>0)
-            uniqueSolutions.addAll(solutions);
-        */
+
         for (int i=0; i < faces.size(); i++) {
             CombiFace anchor = new CombiFace(faces.get(i).clone());
-            System.out.println("Solving using following face as anchor:");
+            //System.out.println("Solving using following face as anchor:");
             anchor.print();
-            List<CombiFace> solutions = solveForAnchor(0, anchor, faces);
-            if (solutions!=null && solutions.size()>0)
-                uniqueSolutions.addAll(solutions);
+            solveForAnchor(0, anchor, faces, uniqueSolutions);
         }
 
         System.out.println("=============PRINTING SOLUTIONS=============");
         System.out.println("============================================");
         for (int i=0; i < uniqueSolutions.size(); i++) {
             System.out.println(String.format("============= SOLUTION # %d ============", i));
+            System.out.println(((CombiFace)uniqueSolutions.get(i)).getMatchedSequence(null));
             uniqueSolutions.get(i).print();
         }
         return uniqueSolutions;
     }
 
 
-    private List<CombiFace> solveForAnchor(int level, CombiFace anchor, List<HappyFace> origFaces) {
-        List<HappyFace> faces = new ArrayList<HappyFace>(origFaces.size());
+    public static void solveForAnchor(final int level, final CombiFace anchor, final List<HappyFace> origFaces, final List<HappyFace> validCombinations) {
+        final List<HappyFace> faces = new ArrayList<HappyFace>(origFaces.size());
         faces.addAll(origFaces);
-        List<CombiFace> validCombinations = new ArrayList<CombiFace>(2);
-        CombiFace preservedAnchor;
+        if(faces.contains(anchor))
+            faces.remove(anchor);
+        if (faces.size()==0)
+            return;
 
-        int opId = -1;
-        for (int j=0; j < faces.size(); j++) {
-            opId++;
-            if (anchor.equals(faces.get(j)))
-                continue;
+        int opId = 1000000 + anchor.howManyAttached()*1000 + level;
+        final Iterator<HappyFace> faceIterator = faces.iterator();
 
-            preservedAnchor = anchor.clone();
-            for (FaceDirection direction : FaceDirection.values()) {
-                if (anchor.hasFace(direction))
-                    continue;
-                HappyFace found = matchOne(anchor, faces.get(j), direction, opId);
+        while (!anchor.isSolved() && faceIterator.hasNext()) {
+            final CombiFace preservedAnchor= anchor.clone();
+            final HappyFace currFace = faceIterator.next();
+            final Iterator<FaceDirection> dirIterator = anchor.getPendingDirections().iterator();
+            HappyFace found = null;
+
+            while(found == null && dirIterator.hasNext() ) {
+                FaceDirection direction = dirIterator.next();
+                System.out.println(anchor.getMatchedSequence("" + opId));
+
+                found = matchOne(anchor, currFace, direction, opId);
                 if (found!=null) {
-                    System.out.println(anchor.getMatchedSequence("" + level));
-                    if (! anchor.isSolved()) {
-                        //Try new solutions by rotating the list
+                    //System.out.println(anchor.getMatchedSequence("" + opId));
+                    if (anchor.isSolved()) {
                         try {
-                            List<HappyFace> spawnFaces = new ArrayList<HappyFace>(origFaces.size());
-                            for (int k=0; k < faces.size(); k++) {
-                                if( !(k==j || anchor.equals(faces.get(k))))
-                                    spawnFaces.add(faces.get(k));
-                            }
-                            spawnFaces.add(faces.get(j).rotate());
-                            List<CombiFace> spawnedSolutions = solveForAnchor(level+1, preservedAnchor, spawnFaces);
-                            if (spawnedSolutions!=null)
-                                validCombinations.addAll(spawnedSolutions);
+                            for (HappyFace validCombi : validCombinations)
+                                checkConnections(anchor, validCombi);
+                            //anchor.print();
+                            validCombinations.add(anchor);
+                        } catch (AssertionError e) {
+                            System.out.println(e.getMessage());
+                        }
+                    } else {
+                        //Try new solutions by rotating the matched face.
+                        final List<HappyFace> spawnFaces = new ArrayList<HappyFace>(origFaces.size());
+                        for (int k=0; k < faces.size(); k++) {
+                            if( ! currFace.equals(faces.get(k)))
+                                spawnFaces.add(faces.get(k));
+                        }
+
+                        //Attempt matching the next face
+                        solveForAnchor(level+1, anchor, spawnFaces, validCombinations);
+
+                        try { //other combination by stepping back
+                            spawnFaces.add(0, found.rotate());
+                            solveForAnchor(level, preservedAnchor, spawnFaces, validCombinations);
                         } catch (InvalidRotationException re) {
-                            //ignore error
                         }
                     }
                 }
             }
-
-            if (anchor.isSolved())
-                validCombinations.add(anchor);
         }
-
-        return validCombinations;
-
     }
 
+
+    public static void checkConnections(CombiFace anchor, HappyFace other) {
+        if (other==null)
+            throw new AssertionError("Cannot compare connections when other face is null");
+        else if (! (other instanceof CombiFace))
+            throw new AssertionError("Cannot compare connections when other face is not a CombiFace");
+        CombiFace combi = (CombiFace) other;
+        System.out.println(anchor.getConnections());
+        System.out.println( combi.getConnections());
+        if (anchor.getConnections().equals(combi.getConnections()))
+            throw new AssertionError(String.format("combinations around faces [%s] and [%s] are same", anchor.name(), combi.name()));
+    }
 
 }

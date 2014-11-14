@@ -87,7 +87,9 @@ class FaceTests extends Specification {
         face.load()
         then:
         def e = thrown(AssertionError)
-        expect: e.getMessage() == "incomplete data found, should have [4] rows"
+        expect:
+        e.getMessage().startsWith( "incomplete data found,")
+        e.getMessage().endsWith( "should have [4] rows")
 
     }
 
@@ -291,5 +293,15 @@ class FaceTests extends Specification {
         e.getMessage().endsWith(" has all items in column [2] as '0'")
     }
 
+    def "face1 has a name"() {
+        def face = HappyFace.createFromFile("face1.txt", 5)
+        expect :
+        "face1" == face.name()
+    }
 
+    def "conf5 has a name"() {
+        def face = HappyFace.createFromFile("src/test/resources/testFiles/conf5.txt", 5)
+        expect :
+        "conf5" == face.name()
+    }
 }

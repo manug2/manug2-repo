@@ -34,6 +34,8 @@ public class HappySteps {
     @When("^I say solve the cube$")
     public void I_say_solve_the_cube() throws Throwable {
         try {
+            notSolvedMessage = null;
+            assertionErrorMessage = null;
             anchor = solver.solve();
         } catch (RuntimeException e) {
             notSolvedMessage =  e.getMessage();
@@ -66,7 +68,15 @@ public class HappySteps {
 
     @When("^I say solve for unique cubes$")
     public void I_say_solve_for_unique_cubes() throws Throwable {
-        uniqueSolutions = solver.solveUnique();
+        try {
+            notSolvedMessage = null;
+            assertionErrorMessage = null;
+            uniqueSolutions = solver.solveUnique();
+        } catch (RuntimeException e) {
+            notSolvedMessage =  e.getMessage();
+        } catch (AssertionError e) {
+            assertionErrorMessage =  e.getMessage();
+        }
     }
 
     @Then("^tell me the (\\d+) unique cubes are possible$")

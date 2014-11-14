@@ -1,6 +1,7 @@
 package unit
 
 import happy.HappyFace
+import happy.InvalidRotationException
 import org.junit.runner.RunWith;
 import org.spockframework.runtime.Sputnik;
 import spock.lang.Specification;
@@ -128,4 +129,24 @@ class FaceRotationTests extends Specification {
         ([0, 1, 0] == rotatedFace.getColumns(0)) && ([1, 0, 1] == rotatedFace.getColumns(1)) && ([1, 1, 1] == rotatedFace.getColumns(2))
     }
 
+    def "3x3 face makes one additional rotation automatically when first rotation leads to identical previous face" () {
+        def face = HappyFace.createFromString("0 1 0;1 0 1;1 1 1", 3)
+        face.load()
+        face.print()
+        def rotatedFace = face.rotate()
+        rotatedFace.print()
+        expect:
+        2 == rotatedFace.getRotation();
+        ([1, 1, 1] == rotatedFace.getColumns(0)) && ([1, 0, 1] == rotatedFace.getColumns(1)) && ([0, 1, 0] == rotatedFace.getColumns(2))
+    }
+    def "3x3 face makes additional rotations automatically when third rotation leads to identical previous faces recursively" () {
+        def face = HappyFace.createFromString("1 1 0;1 0 1;1 1 0", 3)
+        face.load()
+        face.print()
+        def rotatedFace = face.rotate().rotate().rotate()
+        rotatedFace.print()
+        expect:
+        6 == rotatedFace.getRotation();
+        ([0, 1, 1] == rotatedFace.getColumns(0)) && ([1, 0, 1] == rotatedFace.getColumns(1)) && ([0, 1, 1] == rotatedFace.getColumns(2))
+    }
 }
