@@ -31,6 +31,7 @@ public class CubeSolver {
 
         CombiFace anchor = new CombiFace(faces.get(0));
         anchor.print();
+        combinationsTried.clear();
         CombiFace solved = solve(anchor, faces);
         if (solved!=null)
             return solved;
@@ -59,7 +60,7 @@ public class CubeSolver {
             return null;
     }
 
-    public static HappyFace matchOne(final CombiFace anchor, final HappyFace origFace, final FaceDirection direction, final int opId) {
+    public HappyFace matchOne(final CombiFace anchor, final HappyFace origFace, final FaceDirection direction, final int opId) {
         HappyFace face = origFace.clone();
         while (true) {
             try {
@@ -84,6 +85,7 @@ public class CubeSolver {
         if (faces.size()!=6)
             throw new AssertionError("the cube needs six faces");
 
+        combinationsTried.clear();
 
         List<HappyFace> uniqueSolutions = new ArrayList<HappyFace>(5);
 
@@ -104,16 +106,16 @@ public class CubeSolver {
         return uniqueSolutions;
     }
 
-
-    public static void solveForAnchor(final int level, final CombiFace anchor, final List<HappyFace> origFaces, final List<HappyFace> validCombinations) {
+    public int solveForAnchor(final int sequence, final CombiFace anchor, final List<HappyFace> origFaces
+            , final List<HappyFace> validCombinations) {
         final List<HappyFace> faces = new ArrayList<HappyFace>(origFaces.size());
         faces.addAll(origFaces);
         if(faces.contains(anchor))
             faces.remove(anchor);
         if (faces.size()==0)
-            return;
+            return sequence;
+        int outSequence = sequence;
 
-        int opId = 1000000 + anchor.howManyAttached()*1000 + level;
         final Iterator<HappyFace> faceIterator = faces.iterator();
 
         while (!anchor.isSolved() && faceIterator.hasNext()) {
@@ -123,12 +125,35 @@ public class CubeSolver {
             HappyFace found = null;
 
             while(found == null && dirIterator.hasNext() ) {
-                FaceDirection direction = dirIterator.next();
-                System.out.println(anchor.getMatchedSequence("" + opId));
+                final FaceDirection direction = dirIterator.next();
 
-                found = matchOne(anchor, currFace, direction, opId);
+                HappyFace face = currFace.clone();
+                while (true) {
+                    outSequence++;
+                    try {
+                        final StringBuilder combination = new StringBuilder();
+                        combination.append(sequence).append(';').append(outSequence).append(';');
+                        combination.append(face.name).append(',').append(face.getRotation());
+                        combination.append(',').append(direction);
+                        combination.append(';');
+                        combination.append(anchor.getMatchedSequence());
+                        combinationsTried.add(combination.toString());
+
+                        anchor.match(face, direction);
+                        //System.out.println(String.format("[%d] matched face [%d, %d] to anchor in direction [%s]:",opId, face.name(), face.getRotation(), direction));
+                        found = face;
+                        break;
+                    } catch (FaceNotMatchingException fe) {
+                        try {
+                            face = face.rotate();
+                        } catch (InvalidRotationException re) {
+                            break;
+                        }
+                    }
+                }
                 if (found!=null) {
-                    //System.out.println(anchor.getMatchedSequence("" + opId));
+                    //System.out.println(anchor.getMatchedSequence("" + outSequence));
+                    final List<HappyFace> spawnFaces = getFacesForRecursion(anchor, found, faces);
                     if (anchor.isSolved()) {
                         try {
                             for (HappyFace validCombi : validCombinations)
@@ -139,29 +164,23 @@ public class CubeSolver {
                             System.out.println(e.getMessage());
                         }
                     } else {
-                        //Try new solutions by rotating the matched face.
-                        final List<HappyFace> spawnFaces = new ArrayList<HappyFace>(origFaces.size());
-                        for (int k=0; k < faces.size(); k++) {
-                            if( ! currFace.equals(faces.get(k)))
-                                spawnFaces.add(faces.get(k));
-                        }
-
                         //Attempt matching the next face
-                        solveForAnchor(level+1, anchor, spawnFaces, validCombinations);
-
-                        try { //other combination by stepping back
-                            spawnFaces.add(0, found.rotate());
-                            solveForAnchor(level, preservedAnchor, spawnFaces, validCombinations);
-                        } catch (InvalidRotationException re) {
-                        }
+                        outSequence = solveForAnchor(outSequence, anchor, spawnFaces, validCombinations);
+                    }
+                    //Try new solutions by rotating the matched face.
+                    try { //other combination by stepping back
+                        spawnFaces.add(0, found.rotate());
+                        outSequence = solveForAnchor(outSequence, preservedAnchor, spawnFaces, validCombinations);
+                    } catch (InvalidRotationException re) {
                     }
                 }
             }
         }
+        return outSequence;
     }
 
 
-    public static void checkConnections(CombiFace anchor, HappyFace other) {
+    public void checkConnections(CombiFace anchor, HappyFace other) {
         if (other==null)
             throw new AssertionError("Cannot compare connections when other face is null");
         else if (! (other instanceof CombiFace))
@@ -173,4 +192,21 @@ public class CubeSolver {
             throw new AssertionError(String.format("combinations around faces [%s] and [%s] are same", anchor.name(), combi.name()));
     }
 
+    public List<HappyFace> getFacesForRecursion(CombiFace anchor, HappyFace found, List<HappyFace> faces) {
+        final List<HappyFace> spawnFaces = new ArrayList<HappyFace>(faces.size()-1);
+        for (int k=0; k < faces.size(); k++) {
+            if( ! found.equals(faces.get(k)))
+                spawnFaces.add(faces.get(k));
+        }
+        return spawnFaces;
+    }
+
+    private List<String> combinationsTried = new ArrayList<String>(1000);
+    public List<String> getCombinationsTried() {
+        return combinationsTried;
+    }
+
+    public HappyFace cleanClone(HappyFace face) {
+        return face.cleanClone();
+    }
 }

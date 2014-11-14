@@ -304,4 +304,12 @@ class FaceTests extends Specification {
         expect :
         "conf5" == face.name()
     }
+    def "face can clean clone"() {
+        when:
+        def origFace = HappyFace.createFromString("1 1 0;1 0 0;1 1 0", 3)
+        origFace.load()
+        def face = origFace.rotate()
+        then:
+        face.previousRotations are empty
+    }
 }

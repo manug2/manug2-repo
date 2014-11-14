@@ -489,6 +489,17 @@ public class CombiFace extends HappyFace {
         return builder.toString();
     }
 
+    public final String getMatchedSequence() {
+        final StringBuilder builder = new StringBuilder();
+        builder.append(name).append(',').append(getRotation());
+        for (FaceDirection direction : FaceDirection.values()) {
+            final HappyFace face = sideFaceMap.get(direction);
+            if(face!=null)
+                builder.append(';').append(face.name).append(',').append(face.getRotation()).append(',').append(direction);
+        }
+        return builder.toString();
+    }
+
     public FaceConnections getConnections() {
         return this.conns;
     }

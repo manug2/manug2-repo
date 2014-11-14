@@ -1,6 +1,5 @@
 package unit
 
-import happy.CombiFace
 import happy.CubeSolver
 import happy.HappyFace
 import org.junit.runner.RunWith

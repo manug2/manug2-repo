@@ -356,4 +356,9 @@ public class HappyFace {
     public String name() {
         return name;
     }
+
+    public HappyFace cleanClone() {
+        return new HappyFace(elements, id, matrix, rotation, null, name);
+    }
+
 }
