@@ -8,7 +8,7 @@ import java.util.Map.Entry;
 
 public class CombiFace extends HappyFace {
     public CombiFace(HappyFace anchor) {
-        super(anchor.elementCount(), anchor.identifier(), anchor.getMatrix(), anchor.getRotation(), anchor.previousMatrices, anchor.name);
+        super(anchor.elementCount(), anchor.identifier(), anchor.getMatrix(), anchor.getRotation(), anchor.name);
 
         sideFaceMap = new HashMap<FaceDirection, HappyFace>(5);
         effectiveMatrix = new int[anchor.elementCount()][anchor.elementCount()];

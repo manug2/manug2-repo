@@ -355,7 +355,6 @@ class SolverMatchingTests extends Specification {
         faces.remove(anchor)
         def validCombinations = new ArrayList<HappyFace>(1)
         solver.solveForAnchor(0, anchor, faces, validCombinations)
-        def anchorPart = anchor.name() + ',' + anchor.getRotation() + ';'
         def combos = solver.getCombinationsTried()
         anchor.print()
         System.out.println(anchor.getMatchedSequence())

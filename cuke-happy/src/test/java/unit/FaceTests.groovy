@@ -304,12 +304,19 @@ class FaceTests extends Specification {
         expect :
         "conf5" == face.name()
     }
-    def "face can clean clone"() {
+
+    def "face clone has expected items in previousMatrices"() {
         when:
-        def origFace = HappyFace.createFromString("1 1 0;1 0 0;1 1 0", 3)
+        def origFace = HappyFace.createFromString("1 1 0;1 0 1;1 1 0", 3)
         origFace.load()
-        def face = origFace.rotate()
+        def face = origFace.clone()
         then:
-        face.previousRotations are empty
+        face.getRotation() == 0
+        face.getPreviousMatrices().size() == 1
+        Arrays.equals(face.getPreviousMatrices().get(0)[0], face.getRows(0))
+        Arrays.equals(face.getPreviousMatrices().get(0)[1], face.getRows(1))
+        Arrays.equals(face.getPreviousMatrices().get(0)[2], face.getRows(2))
+
     }
+
 }

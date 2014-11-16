@@ -3,6 +3,7 @@ package happy;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.nio.file.Paths;
 import java.nio.charset.StandardCharsets;
@@ -38,7 +39,7 @@ public class HappyFace {
         matrix = null;
         columns = null;
         rotation = 0;
-        previousMatrices = new ArrayList<int[][]>(8);
+        previousMatrices = new LinkedList<int[][]>();
         if(path==null)
             name = "" + id;
         else {
@@ -49,7 +50,7 @@ public class HappyFace {
         }
     }
 
-    protected HappyFace(int elements, int id, int[][] matrix, int rotation, List<int[][]> previousMatrices, String name) {
+    protected HappyFace(int elements, int id, int[][] matrix, int rotation, String name) {
         path = null;
         data = null;
         this.elements = elements;
@@ -61,9 +62,8 @@ public class HappyFace {
         for (int i=0; i < elements; i++)
             for (int j=0; j< elements; j++)
                 this.columns[i][j] = matrix[j][i];
-        this.previousMatrices = new ArrayList<int[][]>(8);
-        if(previousMatrices!=null)
-            this.previousMatrices.addAll(previousMatrices);
+
+        this.previousMatrices = new LinkedList<int[][]>();
         this.previousMatrices.add(this.matrix);
         this.name = name;
     }
@@ -145,6 +145,7 @@ public class HappyFace {
             else if(colSum==0)
                 throw new AssertionError(String.format("face [%s, %d] has all items in column [%d] as '0'", name, rotation, j));
         }
+        this.previousMatrices.clear();
         this.previousMatrices.add(this.matrix);
     }
 
@@ -237,7 +238,7 @@ public class HappyFace {
             }
         }
 
-        return new HappyFace(elements, id, m, rotation+1, previousMatrices, name);
+        return new HappyFace(elements, id, m, rotation+1, name);
     }
 
     public HappyFace flip() {
@@ -249,7 +250,7 @@ public class HappyFace {
             }
         }
 
-        return new HappyFace(elements, id, m, rotation + 1, previousMatrices, name);
+        return new HappyFace(elements, id, m, rotation + 1, name);
     }
 
     public int getRotation() {
@@ -257,14 +258,16 @@ public class HappyFace {
     }
 
     public HappyFace rotate() {
-         HappyFace newFace = rotateSimple();
-         for (int[][] previous : previousMatrices ) {
-            if (Arrays.deepEquals(newFace.matrix, previous)) {
-                newFace = newFace.rotate();
-                break;
+        HappyFace newFace = this;
+        do {
+            newFace = newFace.rotateSimple();
+            for (int[][] previous : previousMatrices ) {
+                if (Arrays.deepEquals(newFace.matrix, previous))
+                    break;
+                else
+                    newFace.previousMatrices.add(previous);
             }
-        }
-        previousMatrices.add(newFace.matrix);
+        } while (newFace.previousMatrices.size() <= this.previousMatrices.size());
         return newFace;
     }
     public HappyFace rotateSimple() {
@@ -341,7 +344,10 @@ public class HappyFace {
     }
 
     public HappyFace clone() {
-        return new HappyFace(elements, id, matrix, rotation, previousMatrices, name);
+        HappyFace newFace = new HappyFace(elements, id, matrix, rotation, name);
+        for (int j=1; j< previousMatrices.size(); j++)
+            newFace.previousMatrices.add(previousMatrices.get(j));
+        return newFace;
     }
 
     public static int[] reverseArray(int[] input) {
@@ -358,7 +364,11 @@ public class HappyFace {
     }
 
     public HappyFace cleanClone() {
-        return new HappyFace(elements, id, matrix, rotation, null, name);
+        return new HappyFace(elements, id, matrix, rotation, name);
+    }
+
+    public List<int[][]> getPreviousMatrices() {
+        return previousMatrices;
     }
 
 }
