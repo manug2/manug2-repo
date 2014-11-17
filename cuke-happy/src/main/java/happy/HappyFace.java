@@ -1,7 +1,6 @@
 package happy;
 
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -34,7 +33,7 @@ public class HappyFace {
 
         path = filePath;
         data = dataString;
-        elements = elementsCount;
+        numOfElements = elementsCount;
         id = generateId();
         matrix = null;
         columns = null;
@@ -50,17 +49,17 @@ public class HappyFace {
         }
     }
 
-    protected HappyFace(int elements, int id, int[][] matrix, int rotation, String name) {
+    protected HappyFace(int numOfElements, int id, int[][] matrix, int rotation, String name) {
         path = null;
         data = null;
-        this.elements = elements;
+        this.numOfElements = numOfElements;
         this.id = id;
         this.matrix = matrix;
         this.loaded = true;
         this.rotation = rotation;
-        this.columns = new int[elements][elements];
-        for (int i=0; i < elements; i++)
-            for (int j=0; j< elements; j++)
+        this.columns = new int[numOfElements][numOfElements];
+        for (int i=0; i < numOfElements; i++)
+            for (int j=0; j< numOfElements; j++)
                 this.columns[i][j] = matrix[j][i];
 
         this.previousMatrices = new LinkedList<int[][]>();
@@ -71,7 +70,7 @@ public class HappyFace {
     private boolean loaded = false;
     private final String path;
     private int[][] matrix;
-    protected final int elements; //Number of elements per side in the square matrix
+    protected final int numOfElements; //Number of numOfElements per side in the square matrix
     private final String data;
     private final int id;
     private int[][] columns;
@@ -105,46 +104,19 @@ public class HappyFace {
             lines = data.split(";");
         else
             throw new AssertionError(String.format("no data or file provided to load data"));
-        if (lines.length != elements)
-            throw new AssertionError(String.format("incomplete data found, while loading face [%s]; should have [%d] rows", name, elements));
+        if (lines.length != numOfElements)
+            throw new AssertionError(String.format("incomplete data found, while loading face [%s]; should have [%d] rows", name, numOfElements));
 
         loadInternal(lines);
         loaded = true;
     }
 
     private void loadInternal(String[] validLines) {
-        matrix = new int[elements][elements];
-        columns = new int[elements][elements];
-        for (int j=0; j < elements; j++) {
-            String[] row = validLines[j].trim().split(" ");
-            if (row.length !=elements)
-                throw new AssertionError(String.format("incomplete data found, should have [%d] rows with only have '0' and '1' separated by space", elements));
-            for (int i=0; i < elements; i++ ) {
-                int rowSum=0, colSum=0;
-                try {
-                    int item = Integer.parseInt(row[i]);
-                    if (item!=0 && item!=1)
-                        throw new AssertionError(String.format("incorrect data format foundat row [%d], should only have '0' and '1'", j));
-                    else {
-                        matrix[j][i] = item;
-                        columns[i][j] = item;
-                    }
-                } catch (NumberFormatException e) {
-                    throw new AssertionError(String.format("incorrect data format found at row [%d], should only have '0' and '1'", j));
-                }
-            }
-        }
-        for (int j=0; j < elements; j++) {
-            int rowSum = 0, colSum = 0;
-            for (int i=0; i < elements; i++ ) {
-                rowSum += matrix[j][i];
-                colSum += columns[j][i];
-            }
-            if(rowSum==0)
-                throw new AssertionError(String.format("face [%s, %d] has all items in row [%d] as '0'", name, rotation, j));
-            else if(colSum==0)
-                throw new AssertionError(String.format("face [%s, %d] has all items in column [%d] as '0'", name, rotation, j));
-        }
+        matrix = new int[numOfElements][numOfElements];
+        columns = new int[numOfElements][numOfElements];
+        parseStrings(validLines);
+        checkInternalElements();
+        checkRowsAndColumns();
         this.previousMatrices.clear();
         this.previousMatrices.add(this.matrix);
     }
@@ -156,9 +128,9 @@ public class HappyFace {
             builder.append('[').append(name).append(',').append(this).append("]");
         } else {
             builder.append('[').append(name).append(',').append(rotation).append(',').append(System.identityHashCode(this)).append("]");
-            for (int i=0; i < elements; i++) {
+            for (int i=0; i < numOfElements; i++) {
                 builder.append("\n");
-                for (int j=0; j < elements; j++)
+                for (int j=0; j < numOfElements; j++)
                     builder.append(matrix[i][j]).append(' ');
             }
             builder.append("\n");
@@ -170,7 +142,7 @@ public class HappyFace {
     }
 
     public int elementCount() {
-        return elements;
+        return numOfElements;
     }
 
     @Override
@@ -214,43 +186,43 @@ public class HappyFace {
     public int[] getRows(int index) {
         if (!loaded)
             throw new RuntimeException("face data is not loaded. did you call load()?");
-        if (index >= elements)
-            throw new RuntimeException(String.format("face number of elements is limited to [%d], but requested for [%d]", elements, index));
+        if (index >= numOfElements)
+            throw new RuntimeException(String.format("face number of elements is limited to [%d], but requested for [%d]", numOfElements, index));
         return matrix[index];
     }
 
     public int[] getColumns(int index) {
         if (!loaded)
             throw new RuntimeException("face data is not loaded. did you call load()?");
-        if (index >= elements)
-            throw new RuntimeException(String.format("face number of elements is limited to [%d], but requested for [%d]", elements, index));
+        if (index >= numOfElements)
+            throw new RuntimeException(String.format("face number of elements is limited to [%d], but requested for [%d]", numOfElements, index));
        return columns[index];
     }
 
     public HappyFace rotateCW() {
         //simple rotation clock-wise
 
-        int[][] m = new int[elements][elements];
+        int[][] m = new int[numOfElements][numOfElements];
 
-        for (int i=0; i < elements; i++) {
-            for (int j=0; j < elements; j++) {
-                m[i][j] = matrix[elements-1-j][i];
+        for (int i=0; i < numOfElements; i++) {
+            for (int j=0; j < numOfElements; j++) {
+                m[i][j] = matrix[numOfElements -1-j][i];
             }
         }
 
-        return new HappyFace(elements, id, m, rotation+1, name);
+        return new HappyFace(numOfElements, id, m, rotation+1, name);
     }
 
     public HappyFace flip() {
-        int[][] m = new int[elements][elements];
+        int[][] m = new int[numOfElements][numOfElements];
 
-        for (int i=0; i < elements; i++) {
-            for (int j=0; j < elements; j++) {
-                m[i][j] = matrix[i][elements-1-j];
+        for (int i=0; i < numOfElements; i++) {
+            for (int j=0; j < numOfElements; j++) {
+                m[i][j] = matrix[i][numOfElements -1-j];
             }
         }
 
-        return new HappyFace(elements, id, m, rotation + 1, name);
+        return new HappyFace(numOfElements, id, m, rotation + 1, name);
     }
 
     public int getRotation() {
@@ -315,36 +287,49 @@ public class HappyFace {
 
         if (direction == FaceDirection.Left) {
             side1 = getColumns(0);
-            side2 = other.getColumns(elements-1);
+            side2 = other.getColumns(numOfElements -1);
         }
         else if (direction == FaceDirection.Bottom) {
-            side1 = getRows(elements-1);
+            side1 = getRows(numOfElements -1);
             side2 = other.getRows(0);
         }
         else if (direction == FaceDirection.Right) {
-            side1 = getColumns(elements-1);
+            side1 = getColumns(numOfElements -1);
             side2 = other.getColumns(0);
         }
         else if (direction == FaceDirection.Top) {
             side1 = getRows(0);
-            side2 = other.getRows(elements-1);
+            side2 = other.getRows(numOfElements -1);
         } else
             throw new FaceNotMatchingException(String.format("face [%s, %d] not matching when attached on side [%s], direction not known", other.name, other.rotation, direction));
 
-        if(side1[0] + side2[0] > 1)
-            throw new FaceNotMatchingException(String.format("face [%s, %d] not matching when attached on side [%s] because of edge element [%d]", other.name, other.rotation, direction, 0));
-        if(side1[elements-1] + side2[elements-1] > 1)
-            throw new FaceNotMatchingException(String.format("face [%s, %d] not matching when attached on side [%s] because of edge element [%d]", other.name, other.rotation, direction, elements-1));
+        checkAnchorEdgeElement(side1[0] + side2[0], other, direction);
+        checkParllelEdgeElement(side1[numOfElements -1] + side2[numOfElements -1], other, direction);
+        checkInternalElementsOfEdge(side1, side2, other, direction);
+    }
 
-        for (int i=1; i < elements-1; i++) {
-            int ts = side1[i] + side2[i];
-            if (ts != 1)
-                throw new FaceNotMatchingException(String.format("face [%s, %d] not matching when attached on side [%s] because of element [%d]", other.name, other.rotation, direction, i));
+
+    private void checkAnchorEdgeElement(int anchorEdgeElement, HappyFace other, FaceDirection direction) {
+        if (anchorEdgeElement > 1)
+            throw new FaceNotMatchingException(String.format("face [%s, %d] not matching face [%s] at side [%s] because of edge element 0", other.name, other.rotation, name, direction));
+
+    }
+
+    private void checkParllelEdgeElement(int parallelEdgeElement, HappyFace other, FaceDirection direction) {
+        if (parallelEdgeElement > 1)
+            throw new FaceNotMatchingException(String.format("face [%s, %d] not matching face [%s] at side [%s] because of last element", other.name, other.rotation, name, direction));
+
+    }
+
+    private void checkInternalElementsOfEdge(int[] side1, int[] side2, HappyFace other, FaceDirection direction) {
+        for (int i = 1; i < numOfElements - 1; i++) {
+            if ((side1[i] + side2[i]) != 1)
+                throw new FaceNotMatchingException(String.format("face [%s, %d] not matching face [%s] at side [%s] because of element at edge with index [%d]", other.name, other.rotation, name, direction, i));
         }
     }
 
     public HappyFace clone() {
-        HappyFace newFace = new HappyFace(elements, id, matrix, rotation, name);
+        HappyFace newFace = new HappyFace(numOfElements, id, matrix, rotation, name);
         for (int j=1; j< previousMatrices.size(); j++)
             newFace.previousMatrices.add(previousMatrices.get(j));
         return newFace;
@@ -359,16 +344,57 @@ public class HappyFace {
         return output;
     }
 
-    public String name() {
+    public final String name() {
         return name;
     }
 
-    public HappyFace cleanClone() {
-        return new HappyFace(elements, id, matrix, rotation, name);
+    public final HappyFace cleanClone() {
+        return new HappyFace(numOfElements, id, matrix, rotation, name);
     }
 
-    public List<int[][]> getPreviousMatrices() {
+    public final List<int[][]> getPreviousMatrices() {
         return previousMatrices;
     }
 
+    private final void checkInternalElements() {
+        for (int i = 2; i < numOfElements - 1; i++)
+            for (int j = 2; j < numOfElements - 1; j++)
+                if (matrix[i][j] != 1)
+                    throw new AssertionError(String.format("face not filled, element [%d][%d]", i, j));
+    }
+
+    private final void checkRowsAndColumns() {
+        for (int j=0; j < numOfElements; j++) {
+            int rowSum = 0, colSum = 0;
+            for (int i=0; i < numOfElements; i++ ) {
+                rowSum += matrix[j][i];
+                colSum += columns[j][i];
+            }
+            if(rowSum==0)
+                throw new AssertionError(String.format("face [%s, %d] has all items in row [%d] as '0'", name, rotation, j));
+            else if(colSum==0)
+                throw new AssertionError(String.format("face [%s, %d] has all items in column [%d] as '0'", name, rotation, j));
+        }
+    }
+
+    private void parseStrings(final String[] validLines) {
+        for (int j=0; j < numOfElements; j++) {
+            String[] row = validLines[j].trim().split(" ");
+            if (row.length != numOfElements)
+                throw new AssertionError(String.format("incomplete data found, should have [%d] rows with only have '0' and '1' separated by space", numOfElements));
+            for (int i=0; i < numOfElements; i++ ) {
+                try {
+                    int item = Integer.parseInt(row[i]);
+                    if (item!=0 && item!=1)
+                        throw new AssertionError(String.format("incorrect data format found at row [%d], should only have '0' and '1'", j));
+                    else {
+                        matrix[j][i] = item;
+                        columns[i][j] = item;
+                    }
+                } catch (NumberFormatException e) {
+                    throw new AssertionError(String.format("incorrect data format found at row [%d], should only have '0' and '1'", j));
+                }
+            }
+        }
+    }
 }

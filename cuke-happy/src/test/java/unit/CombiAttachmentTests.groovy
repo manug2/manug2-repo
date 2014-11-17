@@ -89,12 +89,12 @@ class CombiAttachmentTests extends Specification {
     }
 
     def "anchor can print when left and top attached face"() {
-        def face = HappyFace.createFromString("0 1 0;1 0 0;1 1 1", 3)
+        def face = HappyFace.createFromString("0 1 0;1 1 0;1 1 1", 3)
         face.load()
         def anchor = new CombiFace(face)
-        def face1 = HappyFace.createFromString("0 0 1;1 0 0;0 1 0", 3)
+        def face1 = HappyFace.createFromString("0 0 1;1 1 0;0 1 0", 3)
         face1.load()
-        def face2 = HappyFace.createFromString("0 1 0;1 0 1;0 0 1", 3)
+        def face2 = HappyFace.createFromString("0 1 0;1 1 1;0 0 1", 3)
         face2.load()
         face2.print()
         expect :
@@ -104,12 +104,12 @@ class CombiAttachmentTests extends Specification {
     }
 
     def "anchor can print when left, top and right attached face"() {
-        def face = HappyFace.createFromString("0 1 0;1 0 0;1 1 1", 3)
+        def face = HappyFace.createFromString("0 1 0;1 1 0;1 1 1", 3)
         face.load()
         def anchor = new CombiFace(face)
-        def face1 = HappyFace.createFromString("0 0 1;1 0 0;0 1 0", 3)
+        def face1 = HappyFace.createFromString("0 0 1;1 1 0;0 1 0", 3)
         face1.load()
-        def face2 = HappyFace.createFromString("0 1 0;1 0 1;0 0 1", 3)
+        def face2 = HappyFace.createFromString("0 1 0;1 1 1;0 0 1", 3)
         face2.load()
         def face3 = HappyFace.createFromString("0 0 1;1 1 1;0 0 1", 3)
         face3.load()
@@ -123,12 +123,12 @@ class CombiAttachmentTests extends Specification {
     }
 
     def "anchor can print when left, top, right and bottom attached face"() {
-        def face = HappyFace.createFromString("0 1 0;1 0 0;1 0 1", 3)
+        def face = HappyFace.createFromString("0 1 0;1 1 0;1 0 1", 3)
         face.load()
         def anchor = new CombiFace(face)
-        def face1 = HappyFace.createFromString("0 0 1;1 0 0;0 1 0", 3)
+        def face1 = HappyFace.createFromString("0 0 1;1 1 0;0 1 0", 3)
         face1.load()
-        def face2 = HappyFace.createFromString("0 1 0;1 0 1;0 0 1", 3)
+        def face2 = HappyFace.createFromString("0 1 0;1 1 1;0 0 1", 3)
         face2.load()
         def face3 = HappyFace.createFromString("0 0 1;1 1 1;0 0 1", 3)
         face3.load()
@@ -145,16 +145,16 @@ class CombiAttachmentTests extends Specification {
     }
 
     def "anchor can print when parallel is attached after adding all other faces"() {
-        def face = HappyFace.createFromString("0 1 0;1 0 0;1 0 1", 3)
+        def face = HappyFace.createFromString("0 1 0;1 1 0;1 0 1", 3)
         face.load()
         def anchor = new CombiFace(face)
-        def face1 = HappyFace.createFromString("0 0 1;1 0 0;0 1 0", 3)
+        def face1 = HappyFace.createFromString("0 0 1;1 1 0;0 1 0", 3)
         face1.load()
-        def face2 = HappyFace.createFromString("0 1 0;1 0 1;0 0 1", 3)
+        def face2 = HappyFace.createFromString("0 1 0;1 1 1;0 0 1", 3)
         face2.load()
         def face3 = HappyFace.createFromString("0 0 1;1 1 0;0 0 1", 3)
         face3.load()
-        def face4 = HappyFace.createFromString("0 1 0;0 0 1;1 0 0", 3)
+        def face4 = HappyFace.createFromString("0 1 0;0 1 1;1 0 0", 3)
         face4.load()
         def face5 = HappyFace.createFromString("1 0 0;0 1 1;0 1 0", 3)
         face5.load()
@@ -197,7 +197,7 @@ class CombiAttachmentTests extends Specification {
         anchor.match(face3, FaceDirection.Right)
         anchor.match(face4, FaceDirection.Bottom)
         anchor.print()
-        anchor.checkEdgeParallel(face5, FaceDirection.Parallel)
+        anchor.checkEdgeParallel(face5)
         then:
         def e = thrown(FaceNotMatchingException)
         e.getMessage() == "parallel face cannot be placed at [Left, Top] corner"
@@ -225,7 +225,7 @@ class CombiAttachmentTests extends Specification {
         anchor.match(face3, FaceDirection.Right)
         anchor.match(face4, FaceDirection.Bottom)
         anchor.print()
-        anchor.checkEdgeParallel(face5, FaceDirection.Parallel)
+        anchor.checkEdgeParallel(face5)
         then:
         def e = thrown(FaceNotMatchingException)
         e.getMessage() == "parallel face cannot be placed at [Right, Top] corner"
@@ -253,7 +253,7 @@ class CombiAttachmentTests extends Specification {
         anchor.match(face3, FaceDirection.Right)
         anchor.match(face4, FaceDirection.Bottom)
         anchor.print()
-        anchor.checkEdgeParallel(face5, FaceDirection.Parallel)
+        anchor.checkEdgeParallel(face5)
         then:
         def e = thrown(FaceNotMatchingException)
         e.getMessage() == "parallel face cannot be placed at [Bottom, Right] corner"
@@ -281,7 +281,7 @@ class CombiAttachmentTests extends Specification {
         anchor.match(face3, FaceDirection.Right)
         anchor.match(face4, FaceDirection.Bottom)
         anchor.print()
-        anchor.checkEdgeParallel(face5, FaceDirection.Parallel)
+        anchor.checkEdgeParallel(face5)
         then:
         def e = thrown(FaceNotMatchingException)
         e.getMessage() == "parallel face cannot be placed at [Left, Bottom] corner"

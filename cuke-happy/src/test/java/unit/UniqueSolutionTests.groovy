@@ -64,7 +64,7 @@ class UniqueSolutionTests extends Specification {
         1 == solutions.size()
     }
 
-    def "solver can find two cubes from given faces given in sequence per feature file" () {
+    def "solver can find one cube from given faces given in sequence per feature file" () {
         when: "we have a solver and faces in incorrect sequence"
         def solver = new CubeSolver(5)
         System.out.println(solver)
@@ -117,6 +117,8 @@ class UniqueSolutionTests extends Specification {
         for ( i in [4, 2, 1, 5, 0, 3] )
             solver.loadFace(HappyFace.createFromFile(String.format("src/test/resources/testFiles/watt%d.txt", i), 5))
         def solutions = solver.solveUnique()
+        System.out.println(String.format("Total number of tried combinations : %d", solver.getCombinationsTried().size()))
+        solver.dumpCombinations("./watt_combinations.csv");
         then:
         1 == solutions.size()
     }

@@ -1,6 +1,11 @@
 package happy;
 
+import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class CubeSolver {
@@ -39,19 +44,25 @@ public class CubeSolver {
             throw new RuntimeException(String.format("I could not solve the cube"));
     }
 
-    private CombiFace solve(CombiFace anchor, List<HappyFace> faces) {
+    private CombiFace solve(CombiFace anchor, List<HappyFace> origFaces) {
         anchor.print();
-        int opId = -1;
-        for (int j=0; j < faces.size(); j++) {
-            opId++;
-            if (anchor.equals(faces.get(j)))
-                continue;
 
-            for (FaceDirection direction : FaceDirection.values()) {
-                if (anchor.hasFace(direction))
-                    continue;
-                matchOne(anchor, faces.get(j), direction, opId);
-            }
+        final List<HappyFace> faces = new ArrayList<HappyFace>(origFaces.size());
+        faces.addAll(origFaces);
+        if(faces.contains(anchor))
+            faces.remove(anchor);
+        if (faces.size()==0)
+            return null;
+
+        int opId = -1;
+        final Iterator<HappyFace> faceIterator = faces.iterator();
+        while (!anchor.isSolved() && faceIterator.hasNext()) {
+            final HappyFace currFace = faceIterator.next();
+            final Iterator<FaceDirection> dirIterator = anchor.getPendingDirections().iterator();
+            HappyFace found = null;
+
+            while(found == null && dirIterator.hasNext() )
+                found = matchOne(anchor, currFace, dirIterator.next(), opId);
         }
 
         if (anchor.isSolved())
@@ -209,4 +220,15 @@ public class CubeSolver {
     public HappyFace cleanClone(HappyFace face) {
         return face.cleanClone();
     }
+
+    public void dumpCombinations(String path) throws IOException {
+
+        try {
+            Files.delete(Paths.get(path));
+        } catch (NoSuchFileException e) {}
+
+        Path file = Files.createFile(Paths.get(path));
+        Files.write(file, getCombinationsTried());
+    }
+
 }

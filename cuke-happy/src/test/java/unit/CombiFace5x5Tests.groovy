@@ -34,17 +34,17 @@ class CombiFace5x5Tests extends Specification {
         when:
         def face = HappyFace.createFromString(5,
                         "0 1 1 1 0;" +
-                        "1 0 0 0 1;" +
-                        "1 0 1 0 0;" +
-                        "0 0 0 1 0;" +
+                        "1 1 1 1 1;" +
+                        "1 1 1 1 0;" +
+                        "0 1 1 1 0;" +
                         "1 0 0 0 0")
         face.load()
         def anchor = new CombiFace(face)
         def face1 = HappyFace.createFromString(5,
                         "0 1 1 1 1;" +
-                        "1 0 0 0 0;" +
-                        "0 1 0 0 0;" +
-                        "1 0 0 0 0;" +
+                        "1 1 1 1 0;" +
+                        "0 1 1 1 0;" +
+                        "1 1 1 1 0;" +
                         "0 0 1 0 0")
         face1.load()
         face1.print()
@@ -58,17 +58,17 @@ class CombiFace5x5Tests extends Specification {
         when:
         def face = HappyFace.createFromString(5,
                 "0 1 1 1 0;" +
-                "1 0 0 0 1;" +
-                "1 0 0 0 1;" +
-                "0 1 0 0 0;" +
+                "1 1 1 1 1;" +
+                "1 1 1 1 1;" +
+                "0 1 1 1 0;" +
                 "1 0 0 0 1")
         face.load()
         def anchor = new CombiFace(face)
         def face1 = HappyFace.createFromString(5,
                 "1 1 1 1 0;" +
-                "0 0 0 1 0;" +
-                "0 1 0 0 1;" +
-                "1 0 0 0 0;" +
+                "0 1 1 1 0;" +
+                "0 1 1 1 1;" +
+                "1 1 1 1 0;" +
                 "0 0 1 0 0")
         face1.load()
         face1.print()
