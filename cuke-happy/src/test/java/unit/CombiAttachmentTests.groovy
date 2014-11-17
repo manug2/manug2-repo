@@ -12,12 +12,12 @@ import spock.lang.Specification
 class CombiAttachmentTests extends Specification {
 
     def "anchor can print when right and top attached face"() {
-        def face = HappyFace.createFromString("0 0 1;1 0 1;1 1 0", 3)
+        def face = HappyFace.createFromString("0 0 1;1 1 1;1 1 0", 3)
         face.load()
         def anchor = new CombiFace(face)
-        def face1 = HappyFace.createFromString("0 1 1;1 0 0;1 1 0", 3)
+        def face1 = HappyFace.createFromString("0 1 1;1 1 0;1 1 0", 3)
         face1.load()
-        def face2 = HappyFace.createFromString("0 1 0;0 0 1;1 1 0", 3)
+        def face2 = HappyFace.createFromString("0 1 0;0 1 1;1 1 0", 3)
         face2.load()
         face2.print()
 
@@ -29,10 +29,10 @@ class CombiAttachmentTests extends Specification {
     }
 
     def "anchor's top and bottom change after attaching a matching face on left"() {
-        def face = HappyFace.createFromString("0 1 0;1 0 0;0 1 1", 3)
+        def face = HappyFace.createFromString("0 1 0;1 1 0;0 1 1", 3)
         face.load()
         def anchor = new CombiFace(face)
-        def face1 = HappyFace.createFromString("0 1 1;1 0 0;1 1 1", 3)
+        def face1 = HappyFace.createFromString("0 1 1;1 1 0;1 1 1", 3)
         face1.load()
         expect:
         [0, 1 ,0] == anchor.getRows(0)//original Top
@@ -44,10 +44,10 @@ class CombiAttachmentTests extends Specification {
     }
 
     def "anchor's top and bottom change after attaching a matching face on right"() {
-        def face = HappyFace.createFromString("0 1 0;1 0 1;1 1 0", 3)
+        def face = HappyFace.createFromString("0 1 0;1 1 1;1 1 0", 3)
         face.load()
         def anchor = new CombiFace(face)
-        def face1 = HappyFace.createFromString("1 1 0;0 0 1;1 1 0", 3)
+        def face1 = HappyFace.createFromString("1 1 0;0 1 1;1 1 0", 3)
         face1.load()
         expect:
         [0, 1 ,0] == anchor.getRows(0)//original Top
@@ -59,10 +59,10 @@ class CombiAttachmentTests extends Specification {
     }
 
     def "anchor's left and right change after attaching a matching face on top"() {
-        def face = HappyFace.createFromString("0 1 0;1 0 1;1 1 0", 3)
+        def face = HappyFace.createFromString("0 1 0;1 1 1;1 1 0", 3)
         face.load()
         def anchor = new CombiFace(face)
-        def face1 = HappyFace.createFromString("0 1 1;1 0 0;1 0 1", 3)
+        def face1 = HappyFace.createFromString("0 1 1;1 1 0;1 0 1", 3)
         face1.load()
         expect:
         [0, 1 ,1] == anchor.getColumns(0)//original Left
@@ -74,7 +74,7 @@ class CombiAttachmentTests extends Specification {
     }
 
     def "anchor's left and right change after attaching a matching face at bottom"() {
-        def face = HappyFace.createFromString("0 1 0;1 0 1;0 1 0", 3)
+        def face = HappyFace.createFromString("0 1 0;1 1 1;0 1 0", 3)
         face.load()
         def anchor = new CombiFace(face)
         def face1 = HappyFace.createFromString("1 0 1;1 1 0;1 0 1", 3)
@@ -177,12 +177,12 @@ class CombiAttachmentTests extends Specification {
 
     def "parallel face cannot be placed at [Left, Top] corner"() {
         when:
-        def face = HappyFace.createFromString("0 1 0;1 0 0;1 0 1", 3)
+        def face = HappyFace.createFromString("0 1 0;1 1 0;1 0 1", 3)
         face.load()
         def anchor = new CombiFace(face)
-        def face1 = HappyFace.createFromString("0 0 1;1 0 0;0 1 0", 3)
+        def face1 = HappyFace.createFromString("0 0 1;1 1 0;0 1 0", 3)
         face1.load()
-        def face2 = HappyFace.createFromString("0 1 0;1 0 1;0 0 1", 3)
+        def face2 = HappyFace.createFromString("0 1 0;1 1 1;0 0 1", 3)
         face2.load()
         def face3 = HappyFace.createFromString("0 0 1;1 1 0;0 0 1", 3)
         face3.load()
@@ -205,16 +205,16 @@ class CombiAttachmentTests extends Specification {
 
     def "parallel face cannot be placed at [Right, Top] corner"() {
         when:
-        def face = HappyFace.createFromString("0 1 0;1 0 0;1 0 1", 3)
+        def face = HappyFace.createFromString("0 1 0;1 1 0;1 0 1", 3)
         face.load()
         def anchor = new CombiFace(face)
-        def face1 = HappyFace.createFromString("0 0 1;1 0 0;0 1 0", 3)
+        def face1 = HappyFace.createFromString("0 0 1;1 1 0;0 1 0", 3)
         face1.load()
-        def face2 = HappyFace.createFromString("0 1 0;1 0 1;0 0 1", 3)
+        def face2 = HappyFace.createFromString("0 1 0;1 1 1;0 0 1", 3)
         face2.load()
         def face3 = HappyFace.createFromString("0 0 1;1 1 0;0 0 1", 3)
         face3.load()
-        def face4 = HappyFace.createFromString("0 1 0;0 0 1;1 0 0", 3)
+        def face4 = HappyFace.createFromString("0 1 0;0 1 1;1 0 0", 3)
         face4.load()
         def face5 = HappyFace.createFromString("1 0 1;0 1 1;0 1 0", 3)
         face5.load()
@@ -233,16 +233,16 @@ class CombiAttachmentTests extends Specification {
 
     def "parallel face cannot be placed at [Bottom, Right] corner"() {
         when:
-        def face = HappyFace.createFromString("0 1 0;1 0 0;1 0 1", 3)
+        def face = HappyFace.createFromString("0 1 0;1 1 0;1 0 1", 3)
         face.load()
         def anchor = new CombiFace(face)
-        def face1 = HappyFace.createFromString("0 0 1;1 0 0;0 1 0", 3)
+        def face1 = HappyFace.createFromString("0 0 1;1 1 0;0 1 0", 3)
         face1.load()
-        def face2 = HappyFace.createFromString("0 1 0;1 0 1;0 0 1", 3)
+        def face2 = HappyFace.createFromString("0 1 0;1 1 1;0 0 1", 3)
         face2.load()
         def face3 = HappyFace.createFromString("0 0 1;1 1 0;0 0 1", 3)
         face3.load()
-        def face4 = HappyFace.createFromString("0 1 0;0 0 1;1 0 0", 3)
+        def face4 = HappyFace.createFromString("0 1 0;0 1 1;1 0 0", 3)
         face4.load()
         def face5 = HappyFace.createFromString("1 0 0;0 1 1;0 1 1", 3)
         face5.load()
@@ -261,16 +261,16 @@ class CombiAttachmentTests extends Specification {
 
     def "parallel face cannot be placed at [Left, Bottom] corner"() {
         when:
-        def face = HappyFace.createFromString("0 1 0;1 0 0;1 0 1", 3)
+        def face = HappyFace.createFromString("0 1 0;1 1 0;1 0 1", 3)
         face.load()
         def anchor = new CombiFace(face)
-        def face1 = HappyFace.createFromString("0 0 1;1 0 0;0 1 0", 3)
+        def face1 = HappyFace.createFromString("0 0 1;1 1 0;0 1 0", 3)
         face1.load()
-        def face2 = HappyFace.createFromString("0 1 0;1 0 1;0 0 1", 3)
+        def face2 = HappyFace.createFromString("0 1 0;1 1 1;0 0 1", 3)
         face2.load()
         def face3 = HappyFace.createFromString("0 0 1;1 1 0;0 0 1", 3)
         face3.load()
-        def face4 = HappyFace.createFromString("0 1 0;0 0 1;1 0 0", 3)
+        def face4 = HappyFace.createFromString("0 1 0;0 1 1;1 0 0", 3)
         face4.load()
         def face5 = HappyFace.createFromString("1 0 0;0 1 1;1 1 0", 3)
         face5.load()

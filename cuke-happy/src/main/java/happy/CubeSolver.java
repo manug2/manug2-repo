@@ -12,12 +12,10 @@ public class CubeSolver {
 
     public CubeSolver(int elementsCount) {
         elements = elementsCount;
-        solved = false;
         faces = new ArrayList<HappyFace>(6);
     }
     private final List<HappyFace> faces;
     private int elements;
-    private boolean solved;
     public void loadFace(HappyFace face) throws IOException {
         if (face.elementCount()!=elements)
             throw new AssertionError(String.format("the cube needs faces with [%d] elements", elements));

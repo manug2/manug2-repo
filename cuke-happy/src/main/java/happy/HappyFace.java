@@ -38,7 +38,7 @@ public class HappyFace {
         matrix = null;
         columns = null;
         rotation = 0;
-        previousMatrices = new LinkedList<int[][]>();
+        previousMatrices = new LinkedList<String>();
         if(path==null)
             name = "" + id;
         else {
@@ -62,8 +62,8 @@ public class HappyFace {
             for (int j=0; j< numOfElements; j++)
                 this.columns[i][j] = matrix[j][i];
 
-        this.previousMatrices = new LinkedList<int[][]>();
-        this.previousMatrices.add(this.matrix);
+        this.previousMatrices = new LinkedList<String>();
+        this.previousMatrices.add(getMatrixAsString());
         this.name = name;
     }
 
@@ -77,7 +77,7 @@ public class HappyFace {
     private int rotation;
     protected final String name;
 
-    protected final List<int[][]> previousMatrices;
+    protected final List<String> previousMatrices;
 
     public boolean isLoaded() {
         return loaded;
@@ -109,6 +109,7 @@ public class HappyFace {
 
         loadInternal(lines);
         loaded = true;
+        this.previousMatrices.add(getMatrixAsString());
     }
 
     private void loadInternal(String[] validLines) {
@@ -117,8 +118,6 @@ public class HappyFace {
         parseStrings(validLines);
         checkInternalElements();
         checkRowsAndColumns();
-        this.previousMatrices.clear();
-        this.previousMatrices.add(this.matrix);
     }
 
     @Override
@@ -139,6 +138,22 @@ public class HappyFace {
     }
     public void print() {
         System.out.println(this.toString());
+    }
+
+    public String getMatrixAsString() {
+        if (!loaded)
+            throw new RuntimeException("face data is not loaded. did you call load()?");
+        StringBuilder builder = new StringBuilder();
+        builder.append('[');
+        for (int i=0; i < numOfElements; i++) {
+            builder.append('[');
+            for (int j=0; j < numOfElements-1; j++)
+                builder.append(matrix[i][j]).append(' ');
+            builder.append(matrix[i][numOfElements-1]);
+            builder.append(']');
+        }
+        builder.append(']');
+        return builder.toString();
     }
 
     public int elementCount() {
@@ -231,10 +246,12 @@ public class HappyFace {
 
     public HappyFace rotate() {
         HappyFace newFace = this;
+        String newFaceMatrixString;
         do {
             newFace = newFace.rotateSimple();
-            for (int[][] previous : previousMatrices ) {
-                if (Arrays.deepEquals(newFace.matrix, previous))
+            newFaceMatrixString = newFace.getMatrixAsString();
+            for (String previous : previousMatrices ) {
+                if (newFaceMatrixString.equals(previous))
                     break;
                 else
                     newFace.previousMatrices.add(previous);
@@ -352,13 +369,13 @@ public class HappyFace {
         return new HappyFace(numOfElements, id, matrix, rotation, name);
     }
 
-    public final List<int[][]> getPreviousMatrices() {
+    public final List<String> getPreviousMatrices() {
         return previousMatrices;
     }
 
     private final void checkInternalElements() {
-        for (int i = 2; i < numOfElements - 1; i++)
-            for (int j = 2; j < numOfElements - 1; j++)
+        for (int i = 1; i < numOfElements - 1; i++)
+            for (int j = 1; j < numOfElements - 1; j++)
                 if (matrix[i][j] != 1)
                     throw new AssertionError(String.format("face not filled, element [%d][%d]", i, j));
     }
