@@ -8,7 +8,7 @@ import java.util.Map.Entry;
 
 public class CombiFace extends HappyFace {
     public CombiFace(HappyFace anchor) {
-        super(anchor.elementCount(), anchor.identifier(), anchor.getMatrix(), anchor.getRotation(), anchor.name);
+        super(anchor.getMatrix(), anchor.getRotation(), anchor.name);
 
         sideFaceMap = new HashMap<FaceDirection, HappyFace>(5);
         effectiveMatrix = new int[anchor.elementCount()][anchor.elementCount()];
@@ -53,7 +53,7 @@ public class CombiFace extends HappyFace {
         if (sideFaceMap.containsKey(direction))
             throw new FaceNotMatchingException(String.format("a matching face already attached on [%s]", direction));
         else if (alreadyMatched(face))
-            throw new FaceNotMatchingException(String.format("face [%d, %d] has already been matched previously", face.identifier(), face.getRotation()));
+            throw new FaceNotMatchingException(String.format("face [%s, %d] has already been matched previously", face.name(), face.getRotation()));
 
         if (FaceDirection.Parallel.equals(direction)) {
 
@@ -434,7 +434,7 @@ public class CombiFace extends HappyFace {
         for (FaceDirection direction : FaceDirection.values()) {
             final HappyFace face = sideFaceMap.get(direction);
             if (face != null)
-                builder.append(';').append(face.name).append(',').append(face.getRotation()).append(',').append(direction);
+                builder.append(',').append(face.name).append(',').append(face.getRotation()).append(',').append(direction);
         }
         return builder.toString();
     }

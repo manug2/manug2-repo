@@ -1,7 +1,8 @@
 package happy;
 
-import java.io.FileWriter;
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -12,7 +13,7 @@ public class CubeSolver {
 
     public CubeSolver(int elementsCount) {
         elements = elementsCount;
-        faces = new ArrayList<HappyFace>(6);
+        faces = new ArrayList<>(6);
     }
     private final List<HappyFace> faces;
     private int elements;
@@ -20,8 +21,6 @@ public class CubeSolver {
         if (face.elementCount()!=elements)
             throw new AssertionError(String.format("the cube needs faces with [%d] elements", elements));
 
-        if (! face.isLoaded())
-            face.load();
         faces.add(face);
     }
 
@@ -43,9 +42,8 @@ public class CubeSolver {
     }
 
     private CombiFace solve(CombiFace anchor, List<HappyFace> origFaces) {
-        anchor.print();
 
-        final List<HappyFace> faces = new ArrayList<HappyFace>(origFaces.size());
+        final List<HappyFace> faces = new ArrayList<>(origFaces.size());
         faces.addAll(origFaces);
         if(faces.contains(anchor))
             faces.remove(anchor);
@@ -101,6 +99,9 @@ public class CubeSolver {
         for (int i=0; i < faces.size(); i++) {
             CombiFace anchor = new CombiFace(faces.get(i).clone());
             //System.out.println("Solving using following face as anchor:");
+
+
+
             anchor.print();
             solveForAnchor(0, anchor, faces, uniqueSolutions);
         }
@@ -117,6 +118,9 @@ public class CubeSolver {
 
     public int solveForAnchor(final int sequence, final CombiFace anchor, final List<HappyFace> origFaces
             , final List<HappyFace> validCombinations) {
+        if (sequence%10000 == 0)
+            anchor.print();
+
         final List<HappyFace> faces = new ArrayList<HappyFace>(origFaces.size());
         faces.addAll(origFaces);
         if(faces.contains(anchor))
@@ -126,61 +130,79 @@ public class CubeSolver {
         int outSequence = sequence;
 
         final Iterator<HappyFace> faceIterator = faces.iterator();
+        CombiFace clonedAnchor = anchor.clone();
+        CombiFace preservedAnchor = null;
 
-        while (!anchor.isSolved() && faceIterator.hasNext()) {
-            final CombiFace preservedAnchor= anchor.clone();
+        while (faceIterator.hasNext()) {
+
+            preservedAnchor = clonedAnchor.clone();
             final HappyFace currFace = faceIterator.next();
             final Iterator<FaceDirection> dirIterator = anchor.getPendingDirections().iterator();
-            HappyFace found = null;
 
-            while(found == null && dirIterator.hasNext() ) {
+            while(dirIterator.hasNext() ) {
+
                 final FaceDirection direction = dirIterator.next();
+                //Skip is parallel face without matching others first.
+                if(FaceDirection.Parallel.equals(direction)) {
+                    if (clonedAnchor.howManyAttached()<4)
+                        break;
+                    else {
+                        ;//System.out.println(clonedAnchor.getMatchedSequence(null));
+                        //clonedAnchor.print();
+                    }
+                }
 
                 HappyFace face = currFace.clone();
+                HappyFace found;
                 while (true) {
                     outSequence++;
-                    try {
-                        final StringBuilder combination = new StringBuilder();
-                        combination.append(sequence).append(';').append(outSequence).append(';');
-                        combination.append(face.name).append(',').append(face.getRotation());
-                        combination.append(',').append(direction);
-                        combination.append(';');
-                        combination.append(anchor.getMatchedSequence());
-                        combinationsTried.add(combination.toString());
+                    final StringBuilder combination = new StringBuilder();
+                    combination.append(sequence).append(',').append(outSequence).append(',');
+                    combination.append(face.name).append(',').append(face.getRotation());
+                    combination.append(',').append(direction);
+                    combination.append(',');
+                    combination.append(clonedAnchor.getMatchedSequence());
+                    combinationsTried.add(combination.toString());
 
-                        anchor.match(face, direction);
-                        //System.out.println(String.format("[%d] matched face [%d, %d] to anchor in direction [%s]:",opId, face.name(), face.getRotation(), direction));
+                    try {
+                        clonedAnchor.match(face, direction);
                         found = face;
-                        break;
                     } catch (FaceNotMatchingException fe) {
+                        found = null;
                         try {
-                            face = face.rotate();
+                            face = face.rotateSimple();
                         } catch (InvalidRotationException re) {
                             break;
                         }
                     }
-                }
-                if (found!=null) {
-                    //System.out.println(anchor.getMatchedSequence("" + outSequence));
-                    final List<HappyFace> spawnFaces = getFacesForRecursion(anchor, found, faces);
-                    if (anchor.isSolved()) {
-                        try {
-                            for (HappyFace validCombi : validCombinations)
-                                checkConnections(anchor, validCombi);
-                            //anchor.print();
-                            validCombinations.add(anchor);
-                        } catch (AssertionError e) {
-                            System.out.println(e.getMessage());
+                    if (found!=null) {
+                        //System.out.println(anchor.getMatchedSequence("" + outSequence));
+                        final List<HappyFace> spawnFaces = getFacesForRecursion(found, faces);
+                        if (clonedAnchor.isSolved()) {
+                            try {
+                                for (HappyFace validCombi : validCombinations)
+                                    checkConnections(clonedAnchor, validCombi);
+                                //anchor.print();
+                                validCombinations.add(clonedAnchor);
+                                clonedAnchor = preservedAnchor.clone();
+                            } catch (AssertionError e) {
+                                System.out.println(e.getMessage());
+                            }
+                        } else {
+                            //Attempt matching the next face
+                            outSequence = solveForAnchor(outSequence, clonedAnchor, spawnFaces, validCombinations);
                         }
-                    } else {
-                        //Attempt matching the next face
-                        outSequence = solveForAnchor(outSequence, anchor, spawnFaces, validCombinations);
-                    }
-                    //Try new solutions by rotating the matched face.
-                    try { //other combination by stepping back
-                        spawnFaces.add(0, found.rotate());
-                        outSequence = solveForAnchor(outSequence, preservedAnchor, spawnFaces, validCombinations);
-                    } catch (InvalidRotationException re) {
+
+                        //Try other combinations by stepping back by rotating the matched face (in current direction)
+                        try { //other combination by stepping back
+                            spawnFaces.add(0, found.rotateSimple());
+                            outSequence = solveForAnchor(outSequence, preservedAnchor, spawnFaces, validCombinations);
+                        } catch (InvalidRotationException re) {
+                            break;
+                        }
+
+                        //Try other combinations by stepping back by reverting the matched face and try matching in other directions
+                        break;
                     }
                 }
             }
@@ -201,8 +223,8 @@ public class CubeSolver {
             throw new AssertionError(String.format("combinations around faces [%s] and [%s] are same", anchor.name(), combi.name()));
     }
 
-    public List<HappyFace> getFacesForRecursion(CombiFace anchor, HappyFace found, List<HappyFace> faces) {
-        final List<HappyFace> spawnFaces = new ArrayList<HappyFace>(faces.size()-1);
+    public List<HappyFace> getFacesForRecursion(HappyFace found, List<HappyFace> faces) {
+        final List<HappyFace> spawnFaces = new ArrayList<>(faces.size()-1);
         for (int k=0; k < faces.size(); k++) {
             if( ! found.equals(faces.get(k)))
                 spawnFaces.add(faces.get(k));
@@ -210,23 +232,26 @@ public class CubeSolver {
         return spawnFaces;
     }
 
-    private List<String> combinationsTried = new ArrayList<String>(1000);
+    private List<String> combinationsTried = new ArrayList<>(10000);
     public List<String> getCombinationsTried() {
         return combinationsTried;
     }
 
-    public HappyFace cleanClone(HappyFace face) {
-        return face.cleanClone();
-    }
-
     public void dumpCombinations(String path) throws IOException {
-
         try {
             Files.delete(Paths.get(path));
         } catch (NoSuchFileException e) {}
 
         Path file = Files.createFile(Paths.get(path));
-        Files.write(file, getCombinationsTried());
+        BufferedWriter writer = Files.newBufferedWriter(file, Charset.defaultCharset());
+        writer.write("In Seq,Out Seq,Candidate,C Rotation,Direction,Anchor,Rotation,One,O Rotation,Two,T R,Three,Th R,Four,F R,Five,F R");
+        writer.newLine();
+        for (String line : combinationsTried) {
+            writer.write(line);
+            writer.newLine();
+            writer.flush();
+        }
+        writer.close();
     }
 
 }

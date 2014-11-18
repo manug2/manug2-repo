@@ -2,6 +2,7 @@ package unit
 
 import happy.FaceConnections
 import happy.HappyFace
+import happy.HappyFaceBuilder
 import org.junit.runner.RunWith
 import org.spockframework.runtime.Sputnik
 import spock.lang.Specification
@@ -10,41 +11,27 @@ import spock.lang.Specification
 class FaceConnectionsTests extends Specification {
 
     def "there is a face connection"() {
-        def face1 = HappyFace.createFromFile("src/test/resources/testFiles/face1.txt", 5)
-        def face2 = HappyFace.createFromFile("src/test/resources/testFiles/face2.txt", 5)
-        face1.load()
-        face2.load()
-
-        def connections = new FaceConnections()
+        FaceConnections conns
         expect:
         true
     }
 
     def "connections can add a new connection"() {
-        def face1 = HappyFace.createFromFile("src/test/resources/testFiles/face1.txt", 5)
-        def face2 = HappyFace.createFromFile("src/test/resources/testFiles/face2.txt", 5)
-        face1.load()
-        face2.load()
-
+        def face1 = HappyFaceBuilder.createBuilder().numOfElements(5).usingFile("src/test/resources/testFiles/face1.txt").build()
+        def face2 = HappyFaceBuilder.createBuilder().numOfElements(5).usingFile("src/test/resources/testFiles/face2.txt").build()
         def connections = new FaceConnections()
         connections.add(face1, face2);
-        System.out.println(connections);
         expect:
         true
     }
 
     def "connections can add two new connection"() {
-        def face1 = HappyFace.createFromFile("src/test/resources/testFiles/face1.txt", 5)
-        def face2 = HappyFace.createFromFile("src/test/resources/testFiles/face2.txt", 5)
-        def face3 = HappyFace.createFromFile("src/test/resources/testFiles/face3.txt", 5)
-        face1.load()
-        face2.load()
-        face3.load()
-
+        def face1 = HappyFaceBuilder.createBuilder().numOfElements(5).usingFile("src/test/resources/testFiles/face1.txt").build()
+        def face2 = HappyFaceBuilder.createBuilder().numOfElements(5).usingFile("src/test/resources/testFiles/face2.txt").build()
+        def face3 = HappyFaceBuilder.createBuilder().numOfElements(5).usingFile("src/test/resources/testFiles/face3.txt").build()
         def connections = new FaceConnections()
         connections.add(face1, face2);
         connections.add(face3, face1);
-        System.out.println(connections);
         expect:
         true
     }
@@ -59,11 +46,8 @@ class FaceConnectionsTests extends Specification {
 
     def "connections cannot add a connection again"() {
         when:
-        def face1 = HappyFace.createFromFile("src/test/resources/testFiles/face1.txt", 5)
-        def face2 = HappyFace.createFromFile("src/test/resources/testFiles/face2.txt", 5)
-        face1.load()
-        face2.load()
-
+        def face1 = HappyFaceBuilder.createBuilder().numOfElements(5).usingFile("src/test/resources/testFiles/face1.txt").build()
+        def face2 = HappyFaceBuilder.createBuilder().numOfElements(5).usingFile("src/test/resources/testFiles/face2.txt").build()
         def connections = new FaceConnections()
         connections.add(face1, face2);
         connections.add(face1, face2);
@@ -72,11 +56,8 @@ class FaceConnectionsTests extends Specification {
     }
 
     def "connections are same"() {
-        def face1 = HappyFace.createFromFile("src/test/resources/testFiles/face1.txt", 5)
-        def face2 = HappyFace.createFromFile("src/test/resources/testFiles/face2.txt", 5)
-        face1.load()
-        face2.load()
-
+        def face1 = HappyFaceBuilder.createBuilder().numOfElements(5).usingFile("src/test/resources/testFiles/face1.txt").build()
+        def face2 = HappyFaceBuilder.createBuilder().numOfElements(5).usingFile("src/test/resources/testFiles/face2.txt").build()
         def connections1 = new FaceConnections()
         connections1.add(face1, face2);
         def connections2 = new FaceConnections()
@@ -87,29 +68,22 @@ class FaceConnectionsTests extends Specification {
     }
 
     def "different connections are not same"() {
-        def face1 = HappyFace.createFromFile("src/test/resources/testFiles/face1.txt", 5)
-        def face2 = HappyFace.createFromFile("src/test/resources/testFiles/face2.txt", 5)
-        def face3 = HappyFace.createFromFile("src/test/resources/testFiles/face3.txt", 5)
-        face1.load()
-        face2.load()
-        face3.load()
-
+        def face1 = HappyFaceBuilder.createBuilder().numOfElements(5).usingFile("src/test/resources/testFiles/face1.txt").build()
+        def face2 = HappyFaceBuilder.createBuilder().numOfElements(5).usingFile("src/test/resources/testFiles/face2.txt").build()
+        def face3 = HappyFaceBuilder.createBuilder().numOfElements(5).usingFile("src/test/resources/testFiles/face3.txt").build()
         def connections1 = new FaceConnections()
         connections1.add(face1, face2);
         def connections2 = new FaceConnections()
         connections2.add(face3, face1);
         expect:
-        false == connections1.equals(connections2);
+        ! connections1.equals(connections2);
 
     }
 
     def "unequal number of connections with several entries should not match"() {
-        def face1 = HappyFace.createFromFile("src/test/resources/testFiles/face1.txt", 5)
-        def face2 = HappyFace.createFromFile("src/test/resources/testFiles/face2.txt", 5)
-        def face3 = HappyFace.createFromFile("src/test/resources/testFiles/face3.txt", 5)
-        face1.load()
-        face2.load()
-        face3.load()
+        def face1 = HappyFaceBuilder.createBuilder().numOfElements(5).usingFile("src/test/resources/testFiles/face1.txt").build()
+        def face2 = HappyFaceBuilder.createBuilder().numOfElements(5).usingFile("src/test/resources/testFiles/face2.txt").build()
+        def face3 = HappyFaceBuilder.createBuilder().numOfElements(5).usingFile("src/test/resources/testFiles/face3.txt").build()
 
         def connections1 = new FaceConnections()
         connections1.add(face1, face2);
@@ -120,17 +94,14 @@ class FaceConnectionsTests extends Specification {
         connections2.add(face3, face1);
         connections2.add(face3, face2);
         expect:
-        false == connections1.equals(connections2);
+        ! connections1.equals(connections2);
 
     }
 
     def "connections with several entries matching are same"() {
-        def face1 = HappyFace.createFromFile("src/test/resources/testFiles/face1.txt", 5)
-        def face2 = HappyFace.createFromFile("src/test/resources/testFiles/face2.txt", 5)
-        def face3 = HappyFace.createFromFile("src/test/resources/testFiles/face3.txt", 5)
-        face1.load()
-        face2.load()
-        face3.load()
+        def face1 = HappyFaceBuilder.createBuilder().numOfElements(5).usingFile("src/test/resources/testFiles/face1.txt").build()
+        def face2 = HappyFaceBuilder.createBuilder().numOfElements(5).usingFile("src/test/resources/testFiles/face2.txt").build()
+        def face3 = HappyFaceBuilder.createBuilder().numOfElements(5).usingFile("src/test/resources/testFiles/face3.txt").build()
 
         def connections1 = new FaceConnections()
         connections1.add(face1, face2);
@@ -149,8 +120,7 @@ class FaceConnectionsTests extends Specification {
     def "8 connections attached in arbitrary sequence do not match"() {
         def faces = new ArrayList<HappyFace>(6)
         for ( i in [0, 1, 2, 3, 4, 5] ) {
-            def face = HappyFace.createFromFile(String.format("src/test/resources/testFiles/face%d.txt", i), 5)
-            face.load()
+            def face = HappyFaceBuilder.createBuilder().numOfElements(5).usingFile(String.format("src/test/resources/testFiles/face%d.txt", i)).build()
             faces.add(face)
         }
         //FaceConnections[face0<->face4 face4<->face5 face2<->face5 face0<->face2 face2<->face3 face3<->face4 face3<->face5 face0<->face3 ]
@@ -175,7 +145,7 @@ class FaceConnectionsTests extends Specification {
         connections2.add(faces.get(2), faces.get(3));
         connections2.add(faces.get(1), faces.get(2));
         expect:
-        false == connections1.equals(connections2)
+        ! connections1.equals(connections2)
 
     }
 
@@ -183,8 +153,7 @@ class FaceConnectionsTests extends Specification {
 
         def faces = new ArrayList<HappyFace>(6)
         for ( i in [0, 1, 2, 3, 4, 5] ) {
-            def face = HappyFace.createFromFile(String.format("src/test/resources/testFiles/face%d.txt", i), 5)
-            face.load()
+            def face = HappyFaceBuilder.createBuilder().numOfElements(5).usingFile(String.format("src/test/resources/testFiles/face%d.txt", i)).build()
             faces.add(face)
         }
 
@@ -237,8 +206,7 @@ class FaceConnectionsTests extends Specification {
 
         def faces = new ArrayList<HappyFace>(6)
         for ( i in [4, 1, 0, 3, 5, 2] ) {
-            def face = HappyFace.createFromFile(String.format("src/test/resources/testFiles/face%d.txt", i), 5)
-            face.load()
+            def face = HappyFaceBuilder.createBuilder().numOfElements(5).usingFile(String.format("src/test/resources/testFiles/face%d.txt", i)).build()
             faces.add(face)
         }
 
