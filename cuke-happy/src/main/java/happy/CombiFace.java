@@ -120,7 +120,7 @@ public class CombiFace extends HappyFace {
 
         StringBuilder builder = new StringBuilder(this.getClass().getCanonicalName());
         builder.append('[').append(name).append(',').append(getRotation()).append(',').append(System.identityHashCode(this)).append("]");
-
+        builder.append(getMatchedSequence("=> "));
         //PRINT Top matrix
         final HappyFace top = getTop();
         final HappyFace left = getLeft();
@@ -419,11 +419,11 @@ public class CombiFace extends HappyFace {
         if (prefix != null)
             builder.append('[').append(prefix).append(']').append(' ');
 
-        builder.append('[').append(name).append(", ").append(getRotation()).append(']');
+        builder.append('[').append(name).append(" ").append(getRotation()).append(']');
         for (FaceDirection direction : FaceDirection.values()) {
             final HappyFace face = sideFaceMap.get(direction);
             if (face != null)
-                builder.append(" - [").append(face.name).append(", ").append(face.getRotation()).append(" (").append(direction).append(")]");
+                builder.append(" - [").append(face.name).append(" ").append(face.getRotation()).append(" (").append(direction).append(")]");
         }
         return builder.toString();
     }

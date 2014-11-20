@@ -255,7 +255,7 @@ class SolverMatchingTests extends Specification {
         solver.solveForAnchor(0, anchor, faces, validCombinations)
         expect:
         solver.getCombinationsTried() != null
-        solver.getCombinationsTried().size() == 14980
+        solver.getCombinationsTried().size() == 158
     }
 
     def "solver gives expected list of first 5 tried combinations for given faces in matching sequence"() {
@@ -271,17 +271,15 @@ class SolverMatchingTests extends Specification {
         def validCombinations = new ArrayList<HappyFace>(1)
         solver.solveForAnchor(0, anchor, faces, validCombinations)
         def combos = solver.getCombinationsTried()
-        System.out.println(anchor.getMatchedSequence())
         expect:
-        combos != null
-        combos[0] == "0,1,face1,0,Left,face0,0"
-        combos[1] == "1,2,face2,0,Bottom,face0,0,face1,0,Left"
-        combos[2] == "2,3,face3,0,Right,face0,0,face1,0,Left,face2,0,Bottom"
-        combos[3] == "3,4,face4,0,Top,face0,0,face1,0,Left,face2,0,Bottom,face3,0,Right"
-        combos[4] == "4,5,face5,0,Parallel,face0,0,face1,0,Left,face2,0,Bottom,face3,0,Right,face4,0,Top"
+        combos[0] == "0,1,face1,0,Left,face0,0,true"
+        combos[1] == "1,2,face2,0,Bottom,face0,0,face1,0,Left,true"
+        combos[2] == "2,3,face3,0,Right,face0,0,face1,0,Left,face2,0,Bottom,true"
+        combos[3] == "3,4,face4,0,Top,face0,0,face1,0,Left,face2,0,Bottom,face3,0,Right,true"
+        combos[4] == "4,5,face5,0,Parallel,face0,0,face1,0,Left,face2,0,Bottom,face3,0,Right,face4,0,Top,true"
     }
 
-    def "solver for given faces in matching sequence, gives expected 6th tried combination by back-tracking and moving forward in another path"() {
+    def "solver for given faces in matching sequence, prints solution in the 6th entry of tried combinations"() {
         def solver = new CubeSolver(5)
         def faces = new ArrayList<HappyFace>(6)
         for ( i in [0, 1, 2, 3, 4, 5] ) {
@@ -295,12 +293,10 @@ class SolverMatchingTests extends Specification {
         solver.solveForAnchor(0, anchor, faces, validCombinations)
         def combos = solver.getCombinationsTried()
         expect:
-        combos != null
-        combos[4] == "4,5,face5,0,Parallel,face0,0,face1,0,Left,face2,0,Bottom,face3,0,Right,face4,0,Top"
-        //combos[5] == "5,6,face5,2,Parallel,face0,0,face1,0,Left,face2,0,Bottom,face3,0,Right,face4,0,Top"
+        combos[5] == "[SOLUTION :4:5] [face0 0] - [face1 0 (Left)] - [face2 0 (Bottom)] - [face3 0 (Right)] - [face4 0 (Top)] - [face5 0 (Parallel)]"
     }
 
-    def "solver for given faces in matching sequence, gives expected 7th tried combination by rotating face"() {
+    def "solver for given faces in matching sequence, tries next combination after back-stepping"() {
         def solver = new CubeSolver(5)
         def faces = new ArrayList<HappyFace>(6)
         for ( i in [0, 1, 2, 3, 4, 5] ) {
@@ -314,117 +310,7 @@ class SolverMatchingTests extends Specification {
         solver.solveForAnchor(0, anchor, faces, validCombinations)
         def combos = solver.getCombinationsTried()
         expect:
-        combos != null
-        combos[4] == "4,5,face5,0,Parallel,face0,0,face1,0,Left,face2,0,Bottom,face3,0,Right,face4,0,Top"
-        //combos[5] == "5,6,face5,2,Parallel,face0,0,face1,0,Left,face2,0,Bottom,face3,0,Right,face4,0,Top"
-        //combos[6] == "5,7,face5,3,Parallel,face0,0,face1,0,Left,face2,0,Bottom,face3,0,Right,face4,0,Top"
-    }
-
-    def "solver gives expected 10th tried combination by back-tracking twice and moving forward in another path"() {
-        def solver = new CubeSolver(5)
-        def faces = new ArrayList<HappyFace>(6)
-        for ( i in [0, 1, 2, 3, 4, 5] ) {
-            def face =HappyFaceBuilder.createBuilder().numOfElements(5).usingFile(String.format("src/test/resources/testFiles/face%d.txt", i)).build()
-            faces.add(face)
-            solver.loadFace(face)
-        }
-        def anchor = new CombiFace(faces.get(0))
-        faces.remove(anchor)
-        def validCombinations = new ArrayList<HappyFace>(1)
-        solver.solveForAnchor(0, anchor, faces, validCombinations)
-        def combos = solver.getCombinationsTried()
-        expect:
-        combos != null
-        combos[3] == "3,4,face4,0,Top,face0,0,face1,0,Left,face2,0,Bottom,face3,0,Right"
-        //combos[7] == "5,8,face5,4,Parallel,face0,0,face1,0,Left,face2,0,Bottom,face3,0,Right,face4,0,Top"
-        //combos[8] == "8,9,face4,2,Top,face0,0,face1,0,Left,face2,0,Bottom,face3,0,Right"
-        //combos[9] == "8,10,face4,3,Top,face0,0,face1,0,Left,face2,0,Bottom,face3,0,Right"
-    }
-
-    def "when input faces in arbitrary sequence per feature file, solver gives list of tried combinations"() {
-        def solver = new CubeSolver(5)
-        def faces = new ArrayList<HappyFace>(6)
-        for ( i in [5, 2, 4, 3, 0, 1] ) {
-            def face =HappyFaceBuilder.createBuilder().numOfElements(5).usingFile(String.format("src/test/resources/testFiles/face%d.txt", i)).build()
-            faces.add(face)
-            solver.loadFace(face)
-        }
-        def anchor = new CombiFace(faces.get(0))
-        faces.remove(anchor)
-        def validCombinations = new ArrayList<HappyFace>(1)
-        solver.solveForAnchor(0, anchor, faces, validCombinations)
-        expect:
-        solver.getCombinationsTried() != null
-        solver.getCombinationsTried().size() == 8471
-    }
-
-    def "when input faces in arbitrary sequence per feature file, solver gives expected list of first 5 tried combinations"() {
-        def solver = new CubeSolver(5)
-        def faces = new ArrayList<HappyFace>(6)
-        for ( i in [5, 2, 4, 3, 0, 1] ) {
-            def face =HappyFaceBuilder.createBuilder().numOfElements(5).usingFile(String.format("src/test/resources/testFiles/face%d.txt", i)).build()
-            faces.add(face)
-            solver.loadFace(face)
-        }
-        def anchor = new CombiFace(faces.get(0))
-        faces.remove(anchor)
-        def validCombinations = new ArrayList<HappyFace>(1)
-        solver.solveForAnchor(0, anchor, faces, validCombinations)
-        def combos = solver.getCombinationsTried()
-        expect:
-        combos != null
-        combos[0] == "0,1,face2,0,Left,face5,0"
-        combos[1] == "0,2,face2,1,Left,face5,0"
-        combos[2] == "0,3,face2,2,Left,face5,0"
-        combos[3] == "0,4,face2,3,Left,face5,0"
-        combos[4] == "4,5,face4,0,Bottom,face5,0,face2,3,Left"
-    }
-
-
-    def "solver gives expected list of first 5 tried combinations for Watt faces in matching sequence"() {
-        def solver = new CubeSolver(5)
-        def faces = new ArrayList<HappyFace>(6)
-        for ( i in [0, 1, 2, 3, 4, 5] ) {
-            def face =HappyFaceBuilder.createBuilder().numOfElements(5).usingFile(String.format("src/test/resources/testFiles/watt%d.txt", i)).build()
-            faces.add(face)
-            solver.loadFace(face)
-        }
-        def anchor = new CombiFace(faces.get(0))
-        faces.remove(anchor)
-        def validCombinations = new ArrayList<HappyFace>(1)
-        solver.solveForAnchor(0, anchor, faces, validCombinations)
-        def combos = solver.getCombinationsTried()
-        expect:
-        combos != null
-        combos[0] == "0,1,watt1,0,Left,watt0,0"
-        combos[1] == "1,2,watt2,0,Bottom,watt0,0,watt1,0,Left"
-        combos[2] == "2,3,watt3,0,Right,watt0,0,watt1,0,Left,watt2,0,Bottom"
-        combos[3] == "3,4,watt4,0,Top,watt0,0,watt1,0,Left,watt2,0,Bottom,watt3,0,Right"
-        combos[4] == "4,5,watt5,0,Parallel,watt0,0,watt1,0,Left,watt2,0,Bottom,watt3,0,Right,watt4,0,Top"
-    }
-
-    def "when Watt faces are in arbitrary sequence per feature file, solver gives expected list of first 5 tried combinations"() {
-        def solver = new CubeSolver(5)
-        def faces = new ArrayList<HappyFace>(6)
-        for ( i in [4, 2, 1, 5, 0, 3] ) {
-            def face =HappyFaceBuilder.createBuilder().numOfElements(5).usingFile(String.format("src/test/resources/testFiles/watt%d.txt", i)).build()
-            faces.add(face)
-            solver.loadFace(face)
-        }
-        def anchor = new CombiFace(faces.get(0))
-        faces.remove(anchor)
-        def validCombinations = new ArrayList<HappyFace>(1)
-        solver.solveForAnchor(0, anchor, faces, validCombinations)
-        anchor.print()
-        def combos = solver.getCombinationsTried()
-        expect:
-        anchor.isSolved()
-        combos != null
-        combos[0] == "0,1,watt2,0,Left,watt4,0"
-        combos[1] == "0,2,watt2,1,Left,watt4,0"
-        combos[2] == "0,3,watt2,2,Left,watt4,0"
-        combos[3] == "3,4,watt1,0,Bottom,watt4,0,watt2,2,Left"
-        combos[4] == "3,5,watt1,1,Bottom,watt4,0,watt2,2,Left"
+        combos[6] == "3,9,face5,4,Top,face0,0,face1,0,Left,face2,0,Bottom,face3,0,Right,false"
     }
 
 }

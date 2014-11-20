@@ -15,21 +15,28 @@ public class HappyFaceBuilder {
     String path;
     String data;
     int rotation=0;
+    String name;
     MatrixBuilder matrixBuilder = new MatrixBuilder();
 
-    private String name() {
-        String name;
+    public HappyFaceBuilder name(String name) {
+        this.name = name;
+        return this;
+    }
 
-        if(path==null)
-            name = generateId();
-        else {
-            final String[] parts = this.path.split("/");
-            final String fileName = parts[parts.length-1];
-            final String[] nameParts = fileName.split("\\.");
-            name =  nameParts[0];
+    private String name() {
+        if(this.name==null) {
+            if(path==null)
+                name = generateId();
+            else {
+                final String[] parts = this.path.split("/");
+                final String fileName = parts[parts.length-1];
+                final String[] nameParts = fileName.split("\\.");
+                name =  nameParts[0];
+            }
         }
         return name;
     }
+
     public HappyFaceBuilder rotation(int rotation) {
         this.rotation = rotation;
         return this;
@@ -57,7 +64,7 @@ public class HappyFaceBuilder {
         if(path!=null)
             return buildUsingFile();
         else
-            return buildUsingData();
+            return buildFromData();
     }
 
     private HappyFace buildUsingFile() throws IOException {
@@ -66,7 +73,7 @@ public class HappyFaceBuilder {
         return new HappyFace(this.matrixBuilder.build(lines), rotation, name());
     }
 
-    private HappyFace buildUsingData() {
+    public HappyFace buildFromData() {
         String[] lines = data.split(";");
         return new HappyFace(matrixBuilder.build(lines), rotation, name());
     }

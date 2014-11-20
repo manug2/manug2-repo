@@ -3,6 +3,7 @@ package unit
 import happy.HappyFace
 import happy.HappyFaceBuilder
 import happy.InvalidRotationException
+import happy.MatrixStringConverter
 import org.junit.runner.RunWith;
 import org.spockframework.runtime.Sputnik;
 import spock.lang.Specification;
@@ -162,7 +163,7 @@ class FaceRotationTests extends Specification {
         "[[0 1 1][1 1 1][0 1 1]]" == rotatedFace.getPreviousMatrices().get(0)
 
         //original face is equal to second entry in previousMatrices
-        face.getMatrixAsString().equals(rotatedFace.getPreviousMatrices().get(1))
+        new MatrixStringConverter().convert(face.getMatrix()).equals(rotatedFace.getPreviousMatrices().get(1))
     }
 
     def "new face has correct set of previous matrices after 2 rotations"() {
@@ -176,10 +177,10 @@ class FaceRotationTests extends Specification {
         [1, 1, 1] == rotatedFace.getRows(0) && [1, 1, 1] == rotatedFace.getRows(1) && [0, 1, 0] == rotatedFace.getRows(2)
 
         //original face is equal to third entry in previousMatrices
-        face.getMatrixAsString().equals(rotatedFace.getPreviousMatrices().get(2))
+        new MatrixStringConverter().convert(face.getMatrix()).equals(rotatedFace.getPreviousMatrices().get(2))
 
         //latest rotated matrix is equal to first entry in previousMatrices
-        rotatedFace.getMatrixAsString().equals(rotatedFace.getPreviousMatrices().get(0))
+        new MatrixStringConverter().convert(rotatedFace.getMatrix()).equals(rotatedFace.getPreviousMatrices().get(0))
     }
 
     def "original face retains previous matrices after one rotation" () {
@@ -191,7 +192,7 @@ class FaceRotationTests extends Specification {
         face.getRotation() == 0
         face.getPreviousMatrices().size()==1
         ([0, 1, 0] == face.getRows(0)) && ([1, 1, 1] == face.getRows(1)) && ([1, 1, 1] == face.getRows(2))
-        face.getMatrixAsString().equals(face.getPreviousMatrices().get(0))
+        new MatrixStringConverter().convert(face.getMatrix()).equals(face.getPreviousMatrices().get(0))
     }
 
     def "new face has correct set of previous matrices after one additional automatic rotation" () {
@@ -220,7 +221,47 @@ class FaceRotationTests extends Specification {
 
         //New face is first entry in previousMatrices
         "[[0 1 1][1 1 1][0 1 1]]" == rotatedFace.getPreviousMatrices().get(0)
-        face.getMatrixAsString().equals(clonedFace.getPreviousMatrices().get(1))
+        new MatrixStringConverter().convert(face.getMatrix()).equals(clonedFace.getPreviousMatrices().get(1))
+    }
+
+    def "new face does not change rotation after rewind"() {
+        def face = HappyFaceBuilder.createBuilder().numOfElements(3).usingString("1 1 0;1 1 1;1 1 0").build()
+        def rew = face.rewind()
+        expect:
+        face.getRotation() == rew.getRotation()
+    }
+
+    def "rewound face has 0 rotation"() {
+        def face = HappyFaceBuilder.createBuilder().numOfElements(3).usingString("1 1 0;1 1 1;1 1 0").build()
+        face = face.rotate()
+        def rew = face.rewind()
+        expect:
+        rew.getRotation() == 0
+    }
+
+    def "rewinding face does not change rotation"() {
+        def face = HappyFaceBuilder.createBuilder().numOfElements(3).usingString("1 1 0;1 1 1;1 1 0").build()
+        face = face.rotate()
+        def rotation = face.getRotation()
+        face.rewind()
+        expect:
+        face.getRotation() == rotation
+    }
+
+    def "rewound face has different rotation after rewinding a rotated face"() {
+        def face = HappyFaceBuilder.createBuilder().numOfElements(3).usingString("1 1 0;1 1 1;1 1 0").build()
+        face = face.rotate()
+        def rew = face.rewind()
+        expect:
+        rew.getRotation() < face.getRotation()
+    }
+
+    def "rewound face has expected matrix"() {
+        def face = HappyFaceBuilder.createBuilder().numOfElements(3).usingString("1 1 0;1 1 1;1 1 0").build()
+        face = face.rotate()
+        def rew = face.rewind()
+        expect:
+        new MatrixStringConverter().convert(rew.getMatrix()) == "[[1 1 0][1 1 1][1 1 0]]"
     }
 
 }

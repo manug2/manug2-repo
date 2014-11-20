@@ -3,7 +3,7 @@ package happy;
 public class MatrixBuilder {
 
     public int[][] build(String[] lines) {
-        return matrix(lines).check().matrix;
+        return usingLines(lines).check().matrix;
     }
 
     int[][] matrix;
@@ -12,7 +12,7 @@ public class MatrixBuilder {
         this.numOfElements = numOfElements;
         return this;
     }
-    public MatrixBuilder matrix(String[] lines) {
+    public MatrixBuilder usingLines(String[] lines) {
         parseStrings(lines);
         return this;
     }

@@ -95,8 +95,9 @@ class UniqueSolutionTests extends Specification {
         def solver = new CubeSolver(5)
         for ( i in [0, 1, 2, 3, 4, 5] )
             solver.loadFace(HappyFaceBuilder.createBuilder().numOfElements(5).usingFile(String.format("src/test/resources/testFiles/watt%d.txt", i)).build())
-        solver.solve()
         def solutions = solver.solveUnique()
+        //def solutions = solver.solveUnique("./watt_simple_combinations.csv")
+        System.out.println(String.format("Total number of tried combinations : %d", solver.getCombinationsTried().size()))
         then:
         1 == solutions.size()
     }
@@ -107,8 +108,8 @@ class UniqueSolutionTests extends Specification {
         for ( i in [4, 2, 1, 5, 0, 3] )
             solver.loadFace(HappyFaceBuilder.createBuilder().numOfElements(5).usingFile(String.format("src/test/resources/testFiles/watt%d.txt", i)).build())
         def solutions = solver.solveUnique()
+        //def solutions = solver.solveUnique("./watt_combinations.csv")
         System.out.println(String.format("Total number of tried combinations : %d", solver.getCombinationsTried().size()))
-        solver.dumpCombinations("./watt_combinations.csv");
         then:
         1 == solutions.size()
     }

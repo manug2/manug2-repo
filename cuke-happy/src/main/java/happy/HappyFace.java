@@ -16,7 +16,7 @@ public class HappyFace {
                 this.columns[i][j] = matrix[j][i];
 
         this.previousMatrices = new LinkedList<>();
-        this.previousMatrices.add(getMatrixAsString());
+        this.previousMatrices.add(new MatrixStringConverter().convert(matrix));
         this.name = name;
     }
 
@@ -47,20 +47,6 @@ public class HappyFace {
 
     public void print() {
         System.out.println(this.toString());
-    }
-
-    public String getMatrixAsString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append('[');
-        for (int i=0; i < numOfElements; i++) {
-            builder.append('[');
-            for (int j=0; j < numOfElements-1; j++)
-                builder.append(matrix[i][j]).append(' ');
-            builder.append(matrix[i][numOfElements-1]);
-            builder.append(']');
-        }
-        builder.append(']');
-        return builder.toString();
     }
 
     public int elementCount() {
@@ -136,7 +122,7 @@ public class HappyFace {
         String newFaceMatrixString;
         do {
             newFace = newFace.rotateSimple();
-            newFaceMatrixString = newFace.getMatrixAsString();
+            newFaceMatrixString = new MatrixStringConverter().convert(newFace.matrix);
             for (String previous : previousMatrices ) {
                 if (newFaceMatrixString.equals(previous))
                     break;
@@ -274,6 +260,15 @@ public class HappyFace {
 
     public final List<String> getPreviousMatrices() {
         return previousMatrices;
+    }
+
+    public HappyFace rewind() {
+        if (rotation==0)
+            return clone();
+        else {
+            final int[][] matrix = new MatrixStringConverter().convert(previousMatrices.get(previousMatrices.size()-1));
+            return new HappyFace(matrix, 0, this.name);
+        }
     }
 
 }
