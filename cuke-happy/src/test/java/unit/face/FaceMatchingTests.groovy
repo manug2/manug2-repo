@@ -1,4 +1,4 @@
-package unit
+package unit.face
 
 import happy.FaceDirection
 import happy.HappyFace

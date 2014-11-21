@@ -9,7 +9,7 @@ import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 
 public class HappySteps {
-    CubeSolver solver = new CubeSolver(5);
+    CubeSolver solver = new CubeSolver(6);
     String notSolvedMessage = null;
     String assertionErrorMessage = null;
     HappyFace anchor = null;
@@ -27,7 +27,7 @@ public class HappySteps {
             fileNameB.append(".txt");
         System.out.println(String.format("Using face file [%s]", fileNameB.toString()));
 
-        HappyFace face =HappyFaceBuilder.createBuilder().numOfElements(solver.elementCount()).usingFile(fileNameB.toString()).build();
+        HappyFace face =HappyFaceBuilder.createBuilder().numOfElements(5).usingFile(fileNameB.toString()).build();
         solver.loadFace(face);
     }
 

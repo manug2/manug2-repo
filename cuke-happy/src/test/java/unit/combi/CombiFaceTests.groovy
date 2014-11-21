@@ -1,4 +1,4 @@
-package unit
+package unit.combi
 
 import happy.FaceDirection
 import happy.FaceNotMatchingException

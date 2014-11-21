@@ -3,14 +3,14 @@ Feature: Happy cube formation
 Scenario: Six faces are needed to make a cube
 Given a face called 'face1'
 When I say solve the cube
-Then give me message that the cube needs six faces
+Then give me message that the cube needs 6 faces
 
 
 Scenario: Cube cannot be solved with two faces
 Given a face called 'face1'
 And a face called 'face2'
 When I say solve the cube
-Then give me message that the cube needs six faces
+Then give me message that the cube needs 6 faces
 
 Scenario: Six faces can be used to solve a cube
 Given a face called 'face0'

@@ -1,4 +1,4 @@
-package unit
+package unit.face
 
 import happy.HappyFace
 import happy.HappyFaceBuilder
@@ -223,7 +223,7 @@ class FaceRotationTests extends Specification {
         "[[0 1 1][1 1 1][0 1 1]]" == rotatedFace.getPreviousMatrices().get(0)
         new MatrixStringConverter().convert(face.getMatrix()).equals(clonedFace.getPreviousMatrices().get(1))
     }
-
+    /*
     def "new face does not change rotation after rewind"() {
         def face = HappyFaceBuilder.createBuilder().numOfElements(3).usingString("1 1 0;1 1 1;1 1 0").build()
         def rew = face.rewind()
@@ -263,5 +263,5 @@ class FaceRotationTests extends Specification {
         expect:
         new MatrixStringConverter().convert(rew.getMatrix()) == "[[1 1 0][1 1 1][1 1 0]]"
     }
-
+    */
 }
