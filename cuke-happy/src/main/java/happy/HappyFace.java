@@ -261,7 +261,7 @@ public class HappyFace {
     public final List<String> getPreviousMatrices() {
         return previousMatrices;
     }
-    /*
+
     public HappyFace rewind() {
         if (rotation==0)
             return clone();
@@ -270,5 +270,8 @@ public class HappyFace {
             return new HappyFace(matrix, 0, this.name);
         }
     }
-    */
+
+    public final int maxRotations() {
+        return 7;
+    }
 }

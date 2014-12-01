@@ -4,58 +4,56 @@ import java.util.*;
 
 public class CubeSolver {
 
-    public CubeSolver(int numOfFacesInSolution) {
-        faces = new ArrayList<>(6);
-        this.numOfFacesInSolution = numOfFacesInSolution;
+    public CubeSolver() {
+        this.numOfFacesInSolution = 6;
     }
-
-    private final List<HappyFace> faces;
-    public final int numOfFacesInSolution;
-
-    public void loadFace(HappyFace face) {
-        faces.add(face);
+    public CubeSolver usingNumOfFaces(int numOfFaces) {
+        this.numOfFacesInSolution = numOfFaces;
+        return this;
     }
+    public CubeSolver usesStepBack() {
+        this.trySteppingBack = true;
+        return this;
+    }
+    public CubeSolver noSteppingBack() {
+        this.trySteppingBack = false;
+        return this;
+    }
+    private int numOfFacesInSolution;
+    private boolean trySteppingBack = false;
 
-    public HappyFace solve() {
+    public HappyFace solve(final List<HappyFace> faces) {
+        if (faces==null)
+            throw new AssertionError(String.format("the cube needs %d faces, received null", numOfFacesInSolution));
         if (faces.size()<this.numOfFacesInSolution)
             throw new AssertionError(String.format("the cube needs %d faces", numOfFacesInSolution));
 
         CombiFace anchor = new CombiFace(faces.get(0));
         anchor.print();
+        List<HappyFace> uniqueSolutions = new ArrayList<>(faces.size()*2);
+        long numOfOps = solveForAnchor(0, anchor, getFacesForRecursion(anchor, faces), uniqueSolutions);
 
-        solve(anchor, faces);
+        if(uniqueSolutions.size()==0)
+            throw new RuntimeException(String.format("I could not solve the cube"));
+
+
+        anchor = (CombiFace) uniqueSolutions.get(0);
         if (anchor.howManyAttached()==this.numOfFacesInSolution-1)
             return anchor;
         else
             throw new RuntimeException(String.format("I could not solve the cube"));
     }
 
-    public long solve(CombiFace anchor, final List<HappyFace> faces) {
-        int numOfOps = 0;
-        final Iterator<HappyFace> faceIterator = faces.iterator();
-        while ( anchor.howManyAttached()!=this.numOfFacesInSolution-1 && faceIterator.hasNext()) {
-            final HappyFace currFace = faceIterator.next();
-            if(anchor.equals(currFace))
-                continue;
-            final Iterator<FaceDirection> dirIterator = anchor.getPendingDirections().iterator();
-            HappyFace found = null;
-
-            while(found == null && dirIterator.hasNext() ) {
-                found = matchOne(anchor, currFace, dirIterator.next());
-                numOfOps += getNumOfOpsDuringMatchOne(currFace, found);
-            }
-        }
-        return numOfOps;
-    }
-
     public int getNumOfOpsDuringMatchOne(final HappyFace origFace, final HappyFace found) {
         if (found == null)
-            return 8 - origFace.getRotation();
+            return origFace.maxRotations() - origFace.getRotation();
         else
-            return found.getRotation() - origFace.getRotation() + 1;
+            return found.getRotation() - origFace.getRotation();
     }
 
     public HappyFace matchOne(final CombiFace anchor, final HappyFace origFace, final FaceDirection direction) {
+        if (anchor.checkBlocked(origFace, direction))
+            return null;
         HappyFace face = origFace.clone();
         while (true) {
             try {
@@ -71,12 +69,12 @@ public class CubeSolver {
         }
     }
 
-    public List<HappyFace> solveUnique() {
+    public List<HappyFace> solveUnique(final List<HappyFace> faces) {
         if (faces.size() < numOfFacesInSolution)
             throw new AssertionError(String.format("the cube needs %d faces", numOfFacesInSolution));
 
         List<HappyFace> uniqueSolutions = new ArrayList<>(faces.size()*2);
-        solveAllPossibleCombinations(uniqueSolutions);
+        long numOfOps = solveAllPossibleCombinations(faces, uniqueSolutions);
         List<HappyFace> filteredSolutions = filterUnique(uniqueSolutions);
 
         System.out.println("============================================");
@@ -91,23 +89,23 @@ public class CubeSolver {
         return filteredSolutions;
     }
 
-    public long solveAllPossibleCombinations(List<HappyFace> uniqueSolutions) {
+    public long solveAllPossibleCombinations(final List<HappyFace> faces, List<HappyFace> uniqueSolutions) {
         if (faces.size() < numOfFacesInSolution)
             throw new AssertionError(String.format("the cube needs %d faces", numOfFacesInSolution));
 
         long numOfOps = 0;
         for (int i=0; i < faces.size(); i++) {
             CombiFace anchor = new CombiFace(faces.get(i).clone());
-            numOfOps += solveForAnchor(anchor, getFacesForRecursion(anchor, faces), uniqueSolutions);
+            numOfOps += solveForAnchor(0, anchor, getFacesForRecursion(anchor, faces), uniqueSolutions);
         }
         System.out.println(String.format("[solveAllPossibleCombinations] using %d operations \t\t", numOfOps));
 
         return numOfOps;
     }
 
-    public long solveForAnchor(CombiFace anchor, final List<HappyFace> faces
+    public long solveForAnchor(final long lastNumOfOps, CombiFace anchor, final List<HappyFace> faces
             , final List<HappyFace> validCombinations) {
-        int numOfOps = 0;
+        long numOfOps = lastNumOfOps;
         final Iterator<HappyFace> faceIterator = faces.iterator();
         CombiFace preservedAnchor;
 
@@ -115,21 +113,23 @@ public class CubeSolver {
             if(anchor.howManyAttached()==this.numOfFacesInSolution-1)
                 break;
 
-            final HappyFace currFace = faceIterator.next();
+            HappyFace currFace = faceIterator.next();
             final Iterator<FaceDirection> dirIterator = anchor.getPendingDirections().iterator();
 
+            FaceDirection direction = null;
             while( dirIterator.hasNext()) {
                 if(anchor.howManyAttached()==this.numOfFacesInSolution-1)
                     break;
-                final FaceDirection direction = dirIterator.next();
 
-                if(FaceDirection.Parallel.equals(direction)) {
-                    //Skip is parallel face without matching others first.
-                    if (anchor.howManyAttached()<4)
-                        break;
-                }
+                if(direction != null
+                        && anchor.evalAndRegisterRewinding(currFace, direction))
+                    currFace = currFace.rewind();
 
                 preservedAnchor = anchor.clone();
+                direction = dirIterator.next();
+                if(FaceDirection.Parallel.equals(direction) && anchor.howManyAttached() < 4)
+                    break;
+
                 HappyFace found = matchOne(anchor, currFace, direction);
                 numOfOps += getNumOfOpsDuringMatchOne(currFace, found);
 
@@ -138,18 +138,25 @@ public class CubeSolver {
 
                 final List<HappyFace> spawnFaces = getFacesForRecursion(found, faces);
                 if (anchor.howManyAttached()==this.numOfFacesInSolution-1)
-                    validCombinations.add(anchor);
+                    validCombinations.add(anchor.setNumOfOperations(numOfOps));
                 else
-                    numOfOps += solveForAnchor(anchor.clone(), spawnFaces, validCombinations);
+                    numOfOps = solveForAnchor(numOfOps, anchor.clone(), spawnFaces, validCombinations);
 
-                /*
-                try {
-                    final CombiFace stepBack = preservedAnchor.clone();
-                    spawnFaces.add(found.rotate());
-                    outSequence = solveForAnchor(outSequence, stepBack, spawnFaces, validCombinations);
-                } catch (InvalidRotationException re) {
+                if (trySteppingBack) {
+                    HappyFace rotatedFound = null;
+                    try {
+                        rotatedFound = found.rotate();
+                    } catch (InvalidRotationException re) {
+                    }
+
+                    numOfOps += getNumOfOpsDuringMatchOne(found, rotatedFound);
+                    if (rotatedFound!=null) {
+                        spawnFaces.add(rotatedFound);
+                        final CombiFace stepBack = preservedAnchor.clone();
+                        numOfOps = solveForAnchor(numOfOps, stepBack, spawnFaces, validCombinations);
+                    }
                 }
-                */
+
                 anchor = preservedAnchor.clone();
                 break;
             }

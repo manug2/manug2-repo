@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 
 public class CombiFace extends HappyFace {
+
     public CombiFace(HappyFace anchor) {
         super(anchor.getMatrix(), anchor.getRotation(), anchor.name);
 
@@ -20,12 +21,15 @@ public class CombiFace extends HappyFace {
             }
         }
         conns = new FaceConnections();
+        blockedList = new ArrayList<>(3);
+
     }
 
     private int[][] effectiveMatrix;
     private int[][] effectiveColumns;
     private final Map<FaceDirection, HappyFace> sideFaceMap;
     private FaceConnections conns;
+    long numOfOps;
 
     public final HappyFace getLeft() {
         return sideFaceMap.get(FaceDirection.Left);
@@ -223,6 +227,7 @@ public class CombiFace extends HappyFace {
             }
         }
         cloned.conns = conns.clone();
+        cloned.blockedList = new ArrayList<>(this.blockedList);
 
         return cloned;
     }
@@ -352,8 +357,6 @@ public class CombiFace extends HappyFace {
         if (sideFaceMap.size() < 4)
             throw new FaceNotMatchingException(String.format("a matching face can be attached on [%s] only after all other sides are full", FaceDirection.Parallel));
 
-        //this.print();
-        //face.print();
         checkCornersOfParallelFace(face);
         checkOverlappingEdgesOfParallelFace(face);
 
@@ -525,4 +528,28 @@ public class CombiFace extends HappyFace {
         checkEdgeRight(face, FaceDirection.Top);
     }
 
+    public CombiFace setNumOfOperations(long num) {
+        this.numOfOps = num;
+        return this;
+    }
+
+    private List<String> blockedList;
+    public boolean evalAndRegisterRewinding(final HappyFace face, final FaceDirection direction) {
+        if (face.getRotation()==0)
+            return false;
+
+        final String blockingString = generateBlockedString(face, direction);
+        if(blockedList.contains(blockingString))
+            return false;
+        else {
+            blockedList.add(blockingString);
+            return true;
+        }
+    }
+    private String generateBlockedString(final HappyFace face, final FaceDirection direction) {
+        return face.name + "<-"+ direction;
+    }
+    public boolean checkBlocked(final HappyFace face, final FaceDirection direction) {
+        return blockedList.contains(generateBlockedString(face, direction));
+    }
 }

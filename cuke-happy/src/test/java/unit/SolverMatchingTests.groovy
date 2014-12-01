@@ -18,18 +18,17 @@ class SolverMatchingTests extends Specification {
     CombiFace anchor
     def setup() {
         faces = new ArrayList<HappyFace>(6)
-        solver = new CubeSolver(6)
+        solver = new CubeSolver().usingNumOfFaces(6)
         for ( i in [0, 1, 2, 3, 4, 5] ) {
             HappyFace face = HappyFaceBuilder.createBuilder().numOfElements(5).usingFile(String.format("src/test/resources/testFiles/face%d.txt", i)).build()
             faces.add(face)
-            solver.loadFace(face)
         }
         anchor = new CombiFace(faces.get(0))
     }
 
     def "solver can try solving with 6 faces"() {
         when: "we have a solver"
-        solver.solve()
+        solver.solve(faces)
         then:
         true
     }
@@ -85,14 +84,12 @@ class SolverMatchingTests extends Specification {
     def "solver cannot solve try solving with 6 faces when one is incompatible"() {
         when: "we have a solver"
         faces = new ArrayList<HappyFace>(6)
-        solver = new CubeSolver(6)
+        solver = new CubeSolver().usingNumOfFaces(6)
         for ( i in [0, 1, 2, 3, 4, 6] ) {
             HappyFace face = HappyFaceBuilder.createBuilder().numOfElements(5).usingFile(String.format("src/test/resources/testFiles/face%d.txt", i)).build()
             faces.add(face)
-            solver.loadFace(face)
         }
-        anchor = new CombiFace(faces.get(0))
-        solver.solve()
+        solver.solve(faces)
         then:
         thrown(RuntimeException)
     }

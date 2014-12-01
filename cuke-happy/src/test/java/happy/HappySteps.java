@@ -3,17 +3,19 @@ package happy;
 import cucumber.api.java.en.*;
 import sun.security.util.PendingException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 
 public class HappySteps {
-    CubeSolver solver = new CubeSolver(6);
+    CubeSolver solver = new CubeSolver().usingNumOfFaces(6);
     String notSolvedMessage = null;
     String assertionErrorMessage = null;
     HappyFace anchor = null;
     List<HappyFace> uniqueSolutions = null;
+    List<HappyFace> inputFaces = new ArrayList<>(10);
 
     @Given("^a face called '(.*)'$")
     public void a_face_called_face1(String face1) throws Throwable {
@@ -28,7 +30,7 @@ public class HappySteps {
         System.out.println(String.format("Using face file [%s]", fileNameB.toString()));
 
         HappyFace face =HappyFaceBuilder.createBuilder().numOfElements(5).usingFile(fileNameB.toString()).build();
-        solver.loadFace(face);
+        inputFaces.add(face);
     }
 
     @When("^I say solve the cube$")
@@ -36,7 +38,7 @@ public class HappySteps {
         try {
             notSolvedMessage = null;
             assertionErrorMessage = null;
-            anchor = solver.solve();
+            anchor = solver.solve(inputFaces);
         } catch (RuntimeException e) {
             notSolvedMessage =  e.getMessage();
         } catch (AssertionError e) {
@@ -71,7 +73,7 @@ public class HappySteps {
         try {
             notSolvedMessage = null;
             assertionErrorMessage = null;
-            uniqueSolutions = solver.solveUnique();
+            uniqueSolutions = solver.solveUnique(inputFaces);
         } catch (RuntimeException e) {
             notSolvedMessage =  e.getMessage();
         } catch (AssertionError e) {

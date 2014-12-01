@@ -15,75 +15,59 @@ class SolverTests extends Specification {
         expect: true
     }
 
-    def "solver can load a face"() {
-        def solver = new CubeSolver(6)
-        solver.loadFace(HappyFaceBuilder.createBuilder().numOfElements(5).usingFile("src/test/resources/testFiles/face1.txt").build())
-        expect : true
-    }
-
-    def "solver cannot load a bad face"() {
-        when: "we have a solver"
-        def solver = new CubeSolver(6)
-        solver.loadFace(HappyFaceBuilder.createBuilder().numOfElements(5).usingFile("bad_bad.txt").build())
-        then:
-        thrown(IOException)
-    }
-    def "7th face can be loaded" () {
-        def solver = new CubeSolver(6)
-        for ( i in [0, 1, 2, 3, 4, 5, 6] )
-            solver.loadFace(HappyFaceBuilder.createBuilder().numOfElements(5).usingFile("src/test/resources/testFiles/face1.txt").build())
-        expect:
-        true
-    }
 
     def "cannot solve without a face"() {
         when: "we have a solver"
-        def solver = new CubeSolver(6)
-        solver.solve()
+        def solver = new CubeSolver().usingNumOfFaces(6)
+        solver.solve(null)
         then:
         def e = thrown(AssertionError)
-        expect: e.getMessage() == "the cube needs 6 faces"
+        expect: e.getMessage() == "the cube needs 6 faces, received null"
     }
 
-    def "cannot solve with 2 faces"() {
+    def "cannot solve with 2 faces when six are expected"() {
         when: "we have a solver"
-        def solver = new CubeSolver(6)
+        def solver = new CubeSolver().usingNumOfFaces(6)
+        def faces = new ArrayList<>(2)
         for ( i in [0, 1] )
-            solver.loadFace(HappyFaceBuilder.createBuilder().numOfElements(5).usingFile("src/test/resources/testFiles/face1.txt").build())
-        solver.solve()
+            faces.add(HappyFaceBuilder.createBuilder().numOfElements(5).usingFile("src/test/resources/testFiles/face1.txt").build())
+        solver.solve(faces)
         then:
         def e = thrown(AssertionError)
         expect: e.getMessage() == "the cube needs 6 faces"
     }
 
-    def "cannot solve with 3 faces"() {
+    def "cannot solve with 3 faces when six are expected"() {
         when: "we have a solver"
-        def solver = new CubeSolver(6)
+        def solver = new CubeSolver().usingNumOfFaces(6)
+        def faces = new ArrayList<>(3)
         for ( i in [0, 1, 2] )
-            solver.loadFace(HappyFaceBuilder.createBuilder().numOfElements(5).usingFile("src/test/resources/testFiles/face1.txt").build())
-        solver.solve()
+            faces.add(HappyFaceBuilder.createBuilder().numOfElements(5).usingFile("src/test/resources/testFiles/face1.txt").build())
+        solver.solve(faces)
         then:
         def e = thrown(AssertionError)
         expect: e.getMessage() == "the cube needs 6 faces"
     }
 
-    def "cannot solve with 4 faces"() {
+    def "cannot solve with 4 faces when six are expected"() {
         when: "we have a solver"
-        def solver = new CubeSolver(6)
+        def solver = new CubeSolver().usingNumOfFaces(6)
+        def faces = new ArrayList<>(4)
         for ( i in [0, 1, 2, 3] )
-            solver.loadFace(HappyFaceBuilder.createBuilder().numOfElements(5).usingFile("src/test/resources/testFiles/face1.txt").build())
-        solver.solve()
+            faces.add(HappyFaceBuilder.createBuilder().numOfElements(5).usingFile("src/test/resources/testFiles/face1.txt").build())
+        solver.solve(faces)
         then:
         def e = thrown(AssertionError)
         expect: e.getMessage() == "the cube needs 6 faces"
     }
 
-    def "cannot solve with 5 faces"() {
+    def "cannot solve with 5 faces when six are expected"() {
         when: "we have a solver"
-        def solver = new CubeSolver(6)
+        def solver = new CubeSolver().usingNumOfFaces(6)
+        def faces = new ArrayList<>(5)
         for ( i in [0, 1, 2, 3, 4] )
-            solver.loadFace(HappyFaceBuilder.createBuilder().numOfElements(5).usingFile("src/test/resources/testFiles/face1.txt").build())
-        solver.solve()
+            faces.add(HappyFaceBuilder.createBuilder().numOfElements(5).usingFile("src/test/resources/testFiles/face1.txt").build())
+        solver.solve(faces)
         then:
         def e = thrown(AssertionError)
         expect: e.getMessage() == "the cube needs 6 faces"
