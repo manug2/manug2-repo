@@ -34,14 +34,12 @@ def _find_max_cross(array, low, mid, high):
         total += array[i]
         if total > total_left:
             total_left = total
-            #maximum_left = i
 
     total = 0
-    for i in range(mid+1, high+1):
-        total += array[i]
+    for i in range(mid, high):
+        total += array[i+1]
         if total > total_right:
             total_right = total
-            #maximum_right = i
 
     return total_left+total_right
     #end of _find_max_cross
