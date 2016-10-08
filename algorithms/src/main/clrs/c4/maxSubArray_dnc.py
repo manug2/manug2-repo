@@ -1,16 +1,24 @@
 from math import ceil, floor
+from clrs.c4.maxSubArray_n2 import find_max_sub_array as find_max_sub_array_n2
+
 MIN = -1000000
+RECURSION_THRESHOLD = 3
 
 
 def find_max_sub_array(array):
     if len(array) == 0:
         return 0
+
+    if len(array) < RECURSION_THRESHOLD:
+        return find_max_sub_array_n2(array)
+
     """Using divide and conquer technique"""
     return _find_max_sub_array(array, 0, len(array)-1)
 
 
 def _find_max_sub_array(array, low, high):
     """Using divide and conquer technique"""
+
     if low == high:
         return array[low]
 

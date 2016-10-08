@@ -9,8 +9,8 @@ class TestN2(unittest.TestCase):
 
     def setUp(self):
         #self.subject = find_max_sub_array_n2
-        #self.subject = find_max_sub_array_dnc
-        self.subject = find_max_sub_array_n
+        self.subject = find_max_sub_array_dnc
+        #self.subject = find_max_sub_array_n
 
     def test_should_run(self):
         self.assertEqual(0, self.subject([]))
