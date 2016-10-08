@@ -1,16 +1,17 @@
-from math import ceil, floor
-from clrs.c4.maxSubArray_n2 import find_max_sub_array as find_max_sub_array_n2
+from math import floor
+
+from clrs.c4.max_sub_array.max_sub_array_brute_force import find_max_sub_array_brute_force
 
 MIN = -1000000
 RECURSION_THRESHOLD = 3
 
 
-def find_max_sub_array(array):
+def find_max_sub_array_dnc(array):
     if len(array) == 0:
         return 0
 
     if len(array) < RECURSION_THRESHOLD:
-        return find_max_sub_array_n2(array)
+        return find_max_sub_array_brute_force(array)
 
     """Using divide and conquer technique"""
     return _find_max_sub_array(array, 0, len(array)-1)

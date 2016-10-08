@@ -1,7 +1,7 @@
 MIN = -1000000
 
 
-def find_max_sub_array(array):
+def find_max_sub_array_brute_force(array):
     if len(array) == 0:
         return 0
     return _find_max_sub_array(array)
