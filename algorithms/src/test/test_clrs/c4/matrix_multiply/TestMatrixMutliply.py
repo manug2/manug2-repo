@@ -25,3 +25,11 @@ class TestMatrixMultiply(unittest.TestCase):
                 [1, 1]],
                 [[2, 2],
                 [2, 2]]))
+
+
+class TestDivideAndConquer(TestMatrixMultiply):
+
+    def setUp(self):
+        from clrs.c4.matrix_multiply.matrix_multiply_dnc import matrix_multiply_dnc
+        self.algorithm = matrix_multiply_dnc
+        print("using algo->", self.algorithm)

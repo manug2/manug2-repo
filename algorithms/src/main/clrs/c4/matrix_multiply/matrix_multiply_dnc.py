@@ -1,6 +1,6 @@
 
 
-def multiply_brute_force(A, B):
+def matrix_multiply_dnc(A, B):
     C = list()
 
     N = len(A)
@@ -17,3 +17,4 @@ def multiply_brute_force(A, B):
                 C[i][j] += A[i][k] * B[k][j]
 
     return C
+
