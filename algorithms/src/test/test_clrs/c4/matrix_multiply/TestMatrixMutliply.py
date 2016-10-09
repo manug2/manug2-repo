@@ -26,6 +26,18 @@ class TestMatrixMultiply(unittest.TestCase):
                         [[2, 2],
                         [2, 2]]))
 
+    def test_2x4x2(self):
+        self.assertEqual(
+            [[8, 8],
+             [8, 7]],
+            self.algorithm(
+                    [[2, 1, 1, 1],
+                    [1, 1, 2, 1]],
+                                [[2, 2],
+                                 [1, 2],
+                                 [2, 1],
+                                 [1, 1]]))
+
     def test_4x4(self):
         self.assertEqual(
             [[9, 6, 8, 5],
@@ -41,6 +53,20 @@ class TestMatrixMultiply(unittest.TestCase):
                                      [2, 1, 2, 1],
                                      [2, 1, 1, 1],
                                      [2, 1, 2, 1]]))
+
+    def test_4x2x4(self):
+        self.assertEqual(
+            [[5, 4, 5, 3],
+             [3, 3, 3, 2],
+             [4, 5, 4, 3],
+             [6, 6, 6, 4]],
+            self.algorithm(
+                        [[1, 2],
+                         [1, 1],
+                         [2, 1],
+                         [2, 2]],
+                                [[1, 2, 1, 1],
+                                 [2, 1, 2, 1]]))
 
 
 class TestDivideAndConquer(TestMatrixMultiply):
