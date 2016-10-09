@@ -13,6 +13,7 @@ def _matrix_multiply_recursion(A, B, N, A_i, A_j, B_i, B_j):
         return C
 
     N_by_2 = floor(N/2)
+    #N_remaining = N - N_by_2
 
     C11 = _matrix_add(
         _matrix_multiply_recursion(A, B, N_by_2,

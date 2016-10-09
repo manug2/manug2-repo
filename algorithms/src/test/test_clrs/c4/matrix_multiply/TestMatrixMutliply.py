@@ -21,10 +21,26 @@ class TestMatrixMultiply(unittest.TestCase):
             [[6, 6],
              [4, 4]],
             self.algorithm(
-                [[2, 1],
-                [1, 1]],
-                [[2, 2],
-                [2, 2]]))
+                    [[2, 1],
+                    [1, 1]],
+                        [[2, 2],
+                        [2, 2]]))
+
+    def test_4x4(self):
+        self.assertEqual(
+            [[9, 6, 8, 5],
+             [9, 6, 7, 5],
+             [8, 7, 7, 5],
+             [10, 8, 8, 6]],
+            self.algorithm(
+                        [[1, 2, 1, 1],
+                         [1, 1, 2, 1],
+                         [2, 1, 1, 1],
+                         [2, 1, 2, 1]],
+                                    [[1, 2, 1, 1],
+                                     [2, 1, 2, 1],
+                                     [2, 1, 1, 1],
+                                     [2, 1, 2, 1]]))
 
 
 class TestDivideAndConquer(TestMatrixMultiply):

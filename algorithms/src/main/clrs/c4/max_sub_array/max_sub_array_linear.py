@@ -16,6 +16,7 @@ def find_max_sub_array_tuple_linear(array):
 def _find_max_sub_array_tuple(array):
     """Find max sub total in O(n^2)"""
     total = array[0]
+    total2 = array[0]
     maximum = total
     low = 0
     high = 0
@@ -27,12 +28,6 @@ def _find_max_sub_array_tuple(array):
             high = i
         if total < array[i]:
             total = array[i]
-            low = i
-            high = i
-        if array[i] > maximum:
-            maximum = array[i]
-            low = i
-            high = i
 
     return low, high, maximum
 
