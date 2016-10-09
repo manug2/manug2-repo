@@ -16,7 +16,7 @@ class TestMatrixMultiply(unittest.TestCase):
     def test_1x1_rev(self):
         self.assertEqual([[6]], self.algorithm([[3]], [[2]]))
 
-    def test_1x2x1(self):
+    def test_2x2(self):
         self.assertEqual(
             [[6, 6],
              [4, 4]],
