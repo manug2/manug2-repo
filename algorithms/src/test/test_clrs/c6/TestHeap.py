@@ -39,17 +39,23 @@ class TestBuildMaxHeap(unittest.TestCase):
             [1],
             Heap([1]).build_max_heap().array)
 
-    def test_should_heapify_2_element_heap_trivial(self):
+    def test_should_build_2_element_heap_trivial(self):
         self.assertEqual(
             [2, 1],
             Heap([2, 1]).build_max_heap().array)
 
-    def test_should_heapify_2_element_heap(self):
+    def test_should_build_2_element_heap(self):
         self.assertEqual(
             [2, 1],
             Heap([1, 2]).build_max_heap().array)
 
-    def test_should_heapify_3_element_heap(self):
+    def test_should_build_3_element_heap(self):
         self.assertEqual(
             [3, 2, 1],
             Heap([1, 2, 3]).build_max_heap().array)
+
+    def test_should_build(self):
+        self.assertEqual(
+            [16, 14, 10, 8, 7, 9, 3, 2, 4, 1],
+            Heap([4, 1, 3, 2, 16, 9, 10, 14, 8, 7])
+                .build_max_heap().array)

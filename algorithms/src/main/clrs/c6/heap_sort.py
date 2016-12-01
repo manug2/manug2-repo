@@ -1,18 +1,15 @@
+from clrs.c6.heap import Heap
 
-def heapify(heap, index):
-    largest = index
-    left = heap.left(index)
-    right = heap.right(index)
 
-    if left <= heap.size and heap[left] > heap[largest]:
-        largest = left
+def heap_sort(array):
+    heap = Heap(array)
 
-    if right <= heap.size and heap[right] > heap[largest]:
-        largest = right
+    heap.build_max_heap()
+    last = heap.size
 
-    if largest != index:
-        heap.swap(index, largest)
-        heapify(heap, largest)
+    for i in range(last, 1, -1):
+        heap.swap(1, i)
+        heap.size -= 1
+        heap.heapify(1)
 
-    return
-
+    return heap.array
