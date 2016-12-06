@@ -10,6 +10,6 @@ def heap_sort(array):
     for i in range(last, 1, -1):
         heap.swap(1, i)
         heap.size -= 1
-        heap.heapify(1)
+        heap.max_heapify(1)
 
     return heap.array

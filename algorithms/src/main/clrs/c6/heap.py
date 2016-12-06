@@ -14,7 +14,7 @@ class Heap:
         return self.array[item-1]
 
     def parent(self, index):
-        return index / 2
+        return int(floor(index / 2))
 
     def left(self, index):
         return 2 * index
@@ -27,7 +27,7 @@ class Heap:
         self.array[index2-1] = self.array[index1-1]
         self.array[index1-1] = tmp
 
-    def heapify(self, index):
+    def max_heapify(self, index):
         largest = index
         left = self.left(index)
         right = self.right(index)
@@ -40,7 +40,7 @@ class Heap:
 
         if largest != index:
             self.swap(index, largest)
-            self.heapify(largest)
+            self.max_heapify(largest)
 
         return self
 
@@ -48,7 +48,40 @@ class Heap:
         self.size = len(self.array)
         middle = int(floor(self.size/2))
         for i in range(middle, 0, -1):
-            self.heapify(i)
+            self.max_heapify(i)
 
+        return self
+
+    def get_max(self):
+        return self.array[0]
+
+    def extract_max(self):
+        if self.size < 1:
+            raise IndexError('Heap underflow')
+
+        h_max = self.array[0]
+
+        self.array[0] = self.array[self.size-1]
+        self.size -= 1
+        self.max_heapify(1)
+
+        return h_max
+
+    def increase_key(self, index, value):
+        if value < self[index]:
+            raise ValueError('new key is less than current value')
+
+        self.array[index-1] = value
+        i = index
+        while i > 1 and self[self.parent(i)] < self[i]:
+            self.swap(i, self.parent(i))
+            i = self.parent(i)
+
+        return self
+
+    def insert(self, key):
+        self.size += 1
+        self.array.append(-10000)
+        self.increase_key(self.size, key)
         return self
 
