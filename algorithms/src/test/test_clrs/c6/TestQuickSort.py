@@ -1,6 +1,6 @@
 import unittest
 
-from clrs.c6.heap_sort import *
+from clrs.c6.quick_sort import *
 
 
 class TestHeapSort(unittest.TestCase):
@@ -8,26 +8,26 @@ class TestHeapSort(unittest.TestCase):
     def setUp(self):
         pass
 
-    def test_should_sort_3_element_heap(self):
+    def test_should_sort_3_elements(self):
         self.assertEqual(
             [1, 2, 3],
-            heap_sort(
+            quick_sort(
                 [3, 2, 1]))
 
     def test_should_sort(self):
         self.assertEqual(
             [1, 2, 3, 4, 7, 8, 9, 10, 14, 16],
-            heap_sort(
+            quick_sort(
                 [4, 1, 3, 2, 16, 9, 10, 14, 8, 7]))
 
-    def test_should_sort_3_element_min_heap(self):
+    def test_should_sort_3_element_min(self):
         self.assertEqual(
             [3, 2, 1],
-            heap_sort_min(
+            quick_sort_min(
                 [1, 2, 3]))
 
-    def test_should_sort_min_heap(self):
+    def test_should_sort_min(self):
         self.assertEqual(
             [21, 17, 11, 9, 8, 6, 4, 3, 2, 1],
-            heap_sort_min(
+            quick_sort_min(
                 [11, 21, 3, 4, 17, 8, 9, 2, 1, 6]))
