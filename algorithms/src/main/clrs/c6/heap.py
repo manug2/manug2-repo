@@ -27,7 +27,10 @@ class Heap:
         self.array[index2-1] = self.array[index1-1]
         self.array[index1-1] = tmp
 
-    def max_heapify(self, index):
+
+class MaxHeap(Heap):
+
+    def heapify(self, index):
         largest = index
         left = self.left(index)
         right = self.right(index)
@@ -40,15 +43,15 @@ class Heap:
 
         if largest != index:
             self.swap(index, largest)
-            self.max_heapify(largest)
+            self.heapify(largest)
 
         return self
 
-    def build_max_heap(self):
+    def build(self):
         self.size = len(self.array)
         middle = int(floor(self.size/2))
         for i in range(middle, 0, -1):
-            self.max_heapify(i)
+            self.heapify(i)
 
         return self
 
@@ -63,7 +66,7 @@ class Heap:
 
         self.array[0] = self.array[self.size-1]
         self.size -= 1
-        self.max_heapify(1)
+        self.heapify(1)
 
         return h_max
 
