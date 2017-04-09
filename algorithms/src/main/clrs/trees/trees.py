@@ -1,8 +1,39 @@
 
 
 class BinSearchTree:
-    def __init__(self, root):
+    def __init__(self, root=None):
         self.root = root
+
+    def insert(self, item=None, items=None):
+        if items is not None:
+            for item in items:
+                self._insert(item)
+        else:
+            self._insert(item)
+        return self.root
+
+    def _insert(self, item):
+        if self.root is None:
+            self.root = TreeNode(item)
+            return
+
+        y = None
+        x = self.root
+
+        while x is not None:
+            y = x
+            if x.item is not None and item < x.item:
+                x = x.left
+            else:
+                x = x.right
+
+        z = TreeNode(item)
+        z.parent = y
+
+        if z.item < y.item:
+            y.left = z
+        else:
+            y.right = z
 
 
 class TreeNode:
@@ -12,28 +43,6 @@ class TreeNode:
         self.item = item
         self.left=None
         self.right=None
-
-    def insert(self, item=None, items=None):
-        items_left_to_add = items
-
-        if self.item is None:
-            if item is not None:
-                self.item = item
-            elif items is not None:
-                self.item = items[0]
-                items_left_to_add = items[1:]
-
-        if items_left_to_add is None:
-            return self
-
-        for i in items_left_to_add:
-            node = TreeNode(i)
-            node.parent = self
-            if i < self.item:
-                self.left = node
-            else:
-                self.right = node
-        return self
 
     def in_order(self):
         if self.item is None:

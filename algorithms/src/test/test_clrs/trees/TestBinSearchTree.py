@@ -1,11 +1,11 @@
 from unittest import TestCase
-from clrs.trees.trees import TreeNode
+from clrs.trees.trees import BinSearchTree
 
 
-class TestTreeNode(TestCase):
+class TestTreeNodeAndBinSearchTree(TestCase):
 
     def setUp(self):
-        self.tree = TreeNode()
+        self.tree = BinSearchTree()
 
     def test_should_yield_elements_in_order_when_only_1(self):
         self.assertEqual("1", self.tree.insert(1).in_order())
@@ -54,3 +54,15 @@ class TestTreeNode(TestCase):
 
     def test_should_get_successor_of_min(self):
         self.assertEqual(2, self.tree.insert(items=[2, 1, 3]).min().successor().item)
+
+    def test_should_walk_in_order_sequence1(self):
+        self.assertEqual("1 2 3 4", self.tree.insert(items=[2, 1, 3, 4]).in_order())
+
+    def test_should_walk_in_order_sequence2(self):
+        self.assertEqual("1 2 3 4", self.tree.insert(items=[2, 3, 1, 4]).in_order())
+
+    def test_should_walk_in_order_sequence3(self):
+        self.assertEqual("1 2 3 4", self.tree.insert(items=[4, 1, 3, 2]).in_order())
+
+    def test_should_walk_in_order_sequence4(self):
+        self.assertEqual("1 2 3 4", self.tree.insert(items=[4, 3, 2, 1]).in_order())
