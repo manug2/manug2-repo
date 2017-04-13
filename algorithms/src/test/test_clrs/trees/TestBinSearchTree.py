@@ -66,3 +66,24 @@ class TestTreeNodeAndBinSearchTree(TestCase):
 
     def test_should_walk_in_order_sequence4(self):
         self.assertEqual("1 2 3 4", self.tree.insert(items=[4, 3, 2, 1]).in_order())
+
+    def test_should_delete_one_and_only_1(self):
+        node = self.tree.insert(1).find(1)
+        self.assertEquals(node, self.tree.delete(node))
+
+    def test_should_delete_from_left_when_only_3_nodes_in_two_levels(self):
+        node = self.tree.insert(items=[2, 1, 3]).find(1)
+        self.assertEquals(node, self.tree.delete(node))
+
+    def test_should_delete_from_right_when_only_3_nodes_in_two_levels(self):
+        node = self.tree.insert(items=[2, 1, 3]).find(3)
+        self.assertEquals(node, self.tree.delete(node))
+
+    def test_should_delete_from_right_subtree(self):
+        node = self.tree.insert(items=[2, 1, 3, 4]).find(4)
+        self.assertEquals(node, self.tree.delete(node))
+
+    def test_should_delete_from_right_middle_of_subtree(self):
+        node = self.tree.insert(items=[2, 1, 3, 4]).find(3)
+        self.assertEquals(node, self.tree.delete(node))
+
