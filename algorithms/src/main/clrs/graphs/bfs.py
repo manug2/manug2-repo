@@ -18,10 +18,11 @@ class BFS:
         result = ResultBFS().append(s)
         while not queue.empty():
             u = queue.get()
-            for v in g.edges(u):
-                if result.is_white(v):
-                    result.append(v, u)
-                    queue.put(v)
+            if g.has_edges_for(u):
+                for v in g.edges(u):
+                    if result.is_white(v):
+                        result.append(v, u)
+                        queue.put(v)
             result.finish(u)
 
         result.colors[s] = BLACK

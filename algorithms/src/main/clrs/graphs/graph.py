@@ -10,10 +10,14 @@ class Graph:
     def add(self, source, dest=None):
         if source not in self.V:
             self.V.append(source)
+
         if dest is not None:
             if dest not in self.V:
                 self.V.append(dest)
-            if source not in self.E or dest not in self.E[source]:
+
+            if self.has_edges_for(source) and dest in self.E[source]:
+                pass
+            else:
                 self.add_edge(source, dest)
 
         return self
@@ -30,4 +34,7 @@ class Graph:
         if node in self.E:
             return self.E[node]
         else:
-            return []
+            return None
+
+    def has_edges_for(self, node):
+        return node in self.E
