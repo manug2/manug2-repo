@@ -18,11 +18,11 @@ class Graph:
             if self.has_edges_for(source) and dest in self.E[source]:
                 pass
             else:
-                self.add_edge(source, dest)
+                self._add_edge(source, dest)
 
         return self
 
-    def add_edge(self, source, dest):
+    def _add_edge(self, source, dest):
         if source not in self.E:
             self.E[source] = []
         adj = self.E[source]
@@ -38,3 +38,6 @@ class Graph:
 
     def has_edges_for(self, node):
         return node in self.E
+
+    def vertices(self):
+        return self.V

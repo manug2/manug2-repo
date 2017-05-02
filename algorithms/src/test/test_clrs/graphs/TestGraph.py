@@ -18,3 +18,11 @@ class TestGraph(TestCase):
         g = Graph().add("s", "u")
         self.assertTrue(g.contains("s"))
         self.assertTrue(g.contains("u"))
+
+    def test_list_containing_source_node_is_same_as_vertices(self):
+        g = Graph().add("s")
+        self.assertListEqual(["s"], g.vertices())
+
+    def test_list_containing_the_only_2_nodes_is_same_as_vertices(self):
+        g = Graph().add("s", "u")
+        self.assertListEqual(["s", "u"], g.vertices())
