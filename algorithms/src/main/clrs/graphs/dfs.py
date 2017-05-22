@@ -35,6 +35,7 @@ class Forest:
         self.starts = {}
         self.ends = {}
         self.ts=0
+        self.topological = []
 
     def start(self, u):
         self.colors[u] = GRAY
@@ -45,6 +46,7 @@ class Forest:
         self.colors[u] = BLACK
         self.ts+=1
         self.ends[u] = self.ts
+        self.topological.append(u)
 
     def is_white(self, v):
         return v not in self.colors
@@ -58,78 +60,5 @@ class Forest:
         return None
 
     def topo_sort(self):
-        sorter = TopoSort(self.ends)
-        return sorter.sort()
+        return self.topological
 
-
-class TopoSort:
-    def __init__(self, ends):
-        print (ends)
-        self.ends = {}
-        self.series = []
-
-        for v in ends:
-            end = ends[v]
-            self.series.append(end)
-            self.ends[end] = v
-        print (self.ends)
-        self.result = [0]*len(self.ends)
-
-    def sort(self):
-        result = self._sort(0, len(self.ends))
-        result_v = []
-        for i in result:
-            result_v.append(self.ends[i])
-        return result_v
-
-    def _sort(self, lo, hi):
-        if lo >= hi-1:
-            #self.result[lo] = self.series[lo]
-            return [self.series[lo]]
-
-        mid = int(floor((lo + hi)/2))
-        left = self._sort(lo, mid)
-        right = self._sort(mid, hi)
-        #return self._merge(lo, mid, hi, left, right)
-        return self.__merge(left, right)
-
-    def __merge(self, left, right):
-        i=0
-        j=0
-        k=0
-        total_len = len(left) + len(right)
-        result = [0]*(total_len)
-
-        while k < total_len:
-            if i < len(left):
-                if j==len(right) or left[i] > right[j]:
-                    result[k] = left[i]
-                    i+=1
-                else:
-                    result[k] = right[j]
-                    j += 1
-            else:
-                result[k] = right[j]
-                j+=1
-            k+=1
-        return result
-
-
-    def _merge(self, lo, mid, hi, left, right):
-        i=lo
-        j=mid
-        k=lo
-        result = [0]*(hi-lo)
-        while k < hi:
-            if i <= mid:
-                if self.series[i] < self.series[j] or j==hi:
-                    result[k] = self.series[i]
-                    i+=1
-                else:
-                    result[k] = self.series[j]
-                    j += 1
-            else:
-                result[k] = self.series[j]
-                j+=1
-            k+=1
-        return result

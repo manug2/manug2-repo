@@ -52,9 +52,29 @@ class TestDFS(TestCase):
     def test_topo_sort_in_a_4_node_3_edge_graph(self):
         g = Graph().add("s", "u").add("u", "t").add("s", "z")
         forest = DFS().visit(g)
-        self.assertListEqual(["s", "u", "t", "z"], forest.topo_sort())
+        self.assertListEqual(["t", "u", "z", "s"], forest.topo_sort())
 
     def test_topo_sort_in_a_3_node_2_edge_graph(self):
         g = Graph().add("s", "u").add("u", "t")
         forest = DFS().visit(g)
-        self.assertListEqual(["s", "u", "t"], forest.topo_sort())
+        self.assertListEqual(["t", "u", "s"], forest.topo_sort())
+
+    def test_topo_sort_book_example(self):
+        g = Graph()
+        g.add("shirt", "tie")
+        g.add("shirt", "belt")
+        g.add("tie", "jacket")
+        g.add("belt", "jacket")
+
+        g.add("watch")
+
+        g.add("undershorts", "pants")
+        g.add("undershorts", "shoes")
+        g.add("pants", "shoes")
+
+        g.add("socks", "shoes")
+
+        forest = DFS().visit(g)
+        self.assertListEqual(
+            ["socks", "undershorts", "pants", "shoes", "watch", "shirt", "belt", "tie", "jacket"]
+            , forest.topo_sort())
